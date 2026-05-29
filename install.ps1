@@ -59,13 +59,13 @@ try {
             $asarTemp = Join-Path $tempDir "asar_extracted"
             
             Write-Host "Extracting your local app.asar..." -ForegroundColor Gray
-            & npx --yes @electron/asar extract $backupAsar $asarTemp
+            & npx --yes --package=@electron/asar asar extract $backupAsar $asarTemp
             
             Write-Host "Injecting localized preload.js..." -ForegroundColor Gray
             Copy-Item $downloadedPreload (Join-Path $asarTemp "dist\preload.js") -Force
             
             Write-Host "Repacking app.asar..." -ForegroundColor Gray
-            & npx --yes @electron/asar pack $asarTemp $originalAsar
+            & npx --yes --package=@electron/asar asar pack $asarTemp $originalAsar
             
             Write-Host "Dynamic injection applied successfully!" -ForegroundColor Green
             $patchedSuccessfully = $true

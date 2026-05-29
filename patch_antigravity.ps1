@@ -62,14 +62,14 @@ if (Test-Path $localPreloadJs) {
             if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir }
             
             Write-Host "Extracting local app.asar..." -ForegroundColor Gray
-            & npx --yes @electron/asar extract $backupAsar $tempDir
+            & npx --yes --package=@electron/asar asar extract $backupAsar $tempDir
             
             Write-Host "Injecting Chinese preload.js..." -ForegroundColor Gray
             $targetPreload = Join-Path $tempDir "dist\preload.js"
             Copy-Item $localPreloadJs $targetPreload -Force
             
             Write-Host "Repacking app.asar..." -ForegroundColor Gray
-            & npx --yes @electron/asar pack $tempDir $originalAsar
+            & npx --yes --package=@electron/asar asar pack $tempDir $originalAsar
             
             # Clean temp
             Remove-Item -Recurse -Force $tempDir
