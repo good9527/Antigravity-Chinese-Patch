@@ -1,0 +1,13 @@
+# Compilations, extractions, and temporary scripts
+asar_temp/
+cache_strings.txt
+extract_cache_strings.js
+extract_strings.js
+extracted_strings.txt
+filtered_strings.txt
+find_exact_cache_matches.js
+find_exact_ui_matches.js
+find_ui_strings.js
+main.js
+updater.js
+*.asar
