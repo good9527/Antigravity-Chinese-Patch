@@ -216,5 +216,12 @@
   "Reset Zoom": "重置缩放",
   "By using this app, you agree to its": "继续使用本客户端应用程序，即代表您同意其",
   "Your Plan: Google AI Pro": "订阅计划：Google AI 专业版",
-  "Your Plan: Google AI Ultra": "订阅计划：Google AI 旗舰版"
+  "Your Plan: Google AI Ultra": "订阅计划：Google AI 旗舰版",
+  "Configure global allowed and denied resource permissions. ": "配置全局允许和拒绝的资源权限。",
+  "Configure default behaviors, skills, and MCP servers. ": "配置默认行为、技能和 MCP 服务。",
+  "Configure the browser subagent. It requires ": "配置浏览器子智能体。运行此功能需要安装 ",
+  " to be installed. The browser subagent can be invoked by typing /browser in the conversation input box.": "。您可以在输入框中输入 /browser 来召唤浏览器助手。",
+  "View your available model quota and AI credits. Model quota refreshes periodically based on your plan. Enable AI Credit Overages to continue using models when your quota is exhausted.": "查看您可用的模型配额和 AI 点数。模型配额会根据您的订阅计划定期重置。开启允许超出额度后扣除点数，可在配额耗尽后继续使用模型。",
+  "Light Theme": "浅色主题",
+  "Dark Theme": "深色主题"
 }

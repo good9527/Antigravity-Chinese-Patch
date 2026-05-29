@@ -377,7 +377,14 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Go To Projects': '前往项目管理中心',
     'By using this app, you agree to its': '继续使用本客户端应用程序，即代表您同意其',
     'Your Plan: Google AI Pro': '订阅计划：Google AI 专业版',
-    'Your Plan: Google AI Ultra': '订阅计划：Google AI 旗舰版'
+    'Your Plan: Google AI Ultra': '订阅计划：Google AI 旗舰版',
+    'Configure global allowed and denied resource permissions. ': '配置全局允许和拒绝的资源权限。',
+    'Configure default behaviors, skills, and MCP servers. ': '配置默认行为、技能和 MCP 服务。',
+    'Configure the browser subagent. It requires ': '配置浏览器子智能体。运行此功能需要安装 ',
+    ' to be installed. The browser subagent can be invoked by typing /browser in the conversation input box.': '。您可以在输入框中输入 /browser 来召唤浏览器助手。',
+    'View your available model quota and AI credits. Model quota refreshes periodically based on your plan. Enable AI Credit Overages to continue using models when your quota is exhausted.': '查看您可用的模型配额和 AI 点数。模型配额会根据您的订阅计划定期重置。开启允许超出额度后扣除点数，可在配额耗尽后继续使用模型。',
+    'Light Theme': '浅色主题',
+    'Dark Theme': '深色主题'
   };
 
   const substringReplacements = [
@@ -391,8 +398,6 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     { search: 'Turbo mode', replace: '极速模式' },
     { search: 'Custom', replace: '自定义' },
     { search: 'System', replace: '跟随系统' },
-    { search: 'Light', replace: '浅色' },
-    { search: 'Dark', replace: '深色' },
     { search: 'Learn more about ', replace: '了解更多关于 ' },
     { search: 'Learn more about', replace: '了解更多关于' },
     { search: 'Enable Telemetry', replace: '允许收集匿名使用数据' },
@@ -426,12 +431,9 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     { search: 'Zoom In', replace: '放大' },
     { search: 'Zoom Out', replace: '缩小' },
     { search: 'Reset Zoom', replace: '重置缩放' },
-    
-    // Top Menus fallback
-    { search: 'File', replace: '文件' },
-    { search: 'View', replace: '视图' },
-    { search: 'Window', replace: '窗口' },
-    { search: 'Help', replace: '帮助' }
+    { search: 'Go To Projects', replace: '前往项目管理中心' },
+    { search: 'Light Theme', replace: '浅色主题' },
+    { search: 'Dark Theme', replace: '深色主题' }
   ];
 
   const punctuationMap = {
@@ -479,9 +481,11 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
       let newText = trimmed;
       newText = newText.replace('Refreshes in', '额度重置倒计时：');
       newText = newText.replace('hours', '小时');
+      newText = newText.replace('minutes', '浅色' === '' ? '分钟' : '分钟'); // dummy to keep simple replace
       newText = newText.replace('minutes', '分钟');
       newText = newText.replace('hour', '小时');
       newText = newText.replace('minute', '分钟');
+      newText = newText.replaceAll(', ', ' '); // Remove comma for natural Chinese reading
       return normalized.replace(trimmed, newText);
     }
 
