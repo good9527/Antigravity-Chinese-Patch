@@ -31,20 +31,39 @@ if ($processes) {
     Start-Sleep -Seconds 2
 }
 
-# 3. Create backup of original app.asar
-if (-not (Test-Path $backupAsar)) {
-    Write-Host "Creating backup of original app.asar to app.asar.bak..." -ForegroundColor Green
+# 3. Create/Sync backup of original app.asar
+$patchedSuccessfully = $false
+$tempDir = Join-Path $env:TEMP "antigravity_web_patch"
+if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue }
+New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+
+$isCurrentPatched = $false
+$nodeCheck = Get-Command npx -ErrorAction SilentlyContinue
+if ($nodeCheck -and (Test-Path $originalAsar)) {
+    try {
+        $checkTemp = Join-Path $tempDir "check_extract"
+        & npx --yes @electron/asar extract $originalAsar $checkTemp
+        $checkPreload = Join-Path $checkTemp "dist\preload.js"
+        if (Test-Path $checkPreload) {
+            $preloadText = Get-Content -Path $checkPreload -Raw
+            if ($preloadText -like "*Antigravity Chinese Localization Patch*") {
+                $isCurrentPatched = $true
+            }
+        }
+        if (Test-Path $checkTemp) { Remove-Item -Recurse -Force $checkTemp -ErrorAction SilentlyContinue }
+    } catch {
+        # Fallback if check extraction fails
+    }
+}
+
+if (-not $isCurrentPatched) {
+    Write-Host "Fresh/unpatched Antigravity client detected. Updating backup..." -ForegroundColor Green
     Copy-Item $originalAsar $backupAsar -Force
 } else {
-    Write-Host "Backup app.asar.bak already exists. Skipping backup." -ForegroundColor Gray
+    Write-Host "Patched Antigravity client detected. Keeping existing backup." -ForegroundColor Yellow
 }
 
 # 4. Determine patch method
-$patchedSuccessfully = $false
-$tempDir = Join-Path $env:TEMP "antigravity_web_patch"
-if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir }
-New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
-
 $downloadedPreload = Join-Path $tempDir "preload.js"
 
 try {
@@ -52,20 +71,43 @@ try {
     Invoke-RestMethod -Uri "$rawBaseUrl/dist/preload.js" -OutFile $downloadedPreload
     
     # Method A: Dynamic Local ASAR Injection (Requires Node.js)
-    $nodeCheck = Get-Command npx -ErrorAction SilentlyContinue
     if ($nodeCheck) {
         try {
             Write-Host "Node.js detected. Performing dynamic local injection..." -ForegroundColor Green
             $asarTemp = Join-Path $tempDir "asar_extracted"
             
             Write-Host "Extracting your local app.asar..." -ForegroundColor Gray
-            & npx --yes --package=@electron/asar asar extract $backupAsar $asarTemp
+            & npx --yes @electron/asar extract $backupAsar $asarTemp
             
             Write-Host "Injecting localized preload.js..." -ForegroundColor Gray
-            Copy-Item $downloadedPreload (Join-Path $asarTemp "dist\preload.js") -Force
+            $targetPreload = Join-Path $asarTemp "dist\preload.js"
+            if (Test-Path $targetPreload) {
+                # Load original preload.js
+                $originalPreloadContent = Get-Content -Path $targetPreload -Raw
+                
+                # Load downloaded patch
+                $downloadedContent = Get-Content -Path $downloadedPreload -Raw
+                
+                # Extract patch IIFE
+                $patchMarker = "// Antigravity Chinese Localization Patch"
+                $markerIndex = $downloadedContent.IndexOf($patchMarker)
+                if ($markerIndex -ge 0) {
+                    $patchCode = $downloadedContent.Substring($markerIndex)
+                    
+                    # Append patch code
+                    $newPreloadContent = $originalPreloadContent + "`r`n`r`n" + $patchCode
+                    Set-Content -Path $targetPreload -Value $newPreloadContent -Force
+                    Write-Host "Successfully injected patch code into original preload.js!" -ForegroundColor Green
+                } else {
+                    Write-Warning "Could not find patch marker in downloaded preload.js. Falling back to direct replacement."
+                    Copy-Item $downloadedPreload $targetPreload -Force
+                }
+            } else {
+                Copy-Item $downloadedPreload $targetPreload -Force
+            }
             
             Write-Host "Repacking app.asar..." -ForegroundColor Gray
-            & npx --yes --package=@electron/asar asar pack $asarTemp $originalAsar
+            & npx --yes @electron/asar pack $asarTemp $originalAsar
             
             Write-Host "Dynamic injection applied successfully!" -ForegroundColor Green
             $patchedSuccessfully = $true

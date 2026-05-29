@@ -698,6 +698,9 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
         }
       });
     }
+  } catch (e) {
+    console.error('Failed to hook document title:', e);
+  }
   // Dynamic Cloud Dictionary Auto-Updater (Cached via localStorage for instant startup)
   try {
     const cachedDict = localStorage.getItem('antigravity_chinese_patch_dict');
