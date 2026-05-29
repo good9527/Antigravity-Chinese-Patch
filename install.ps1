@@ -42,7 +42,7 @@ $nodeCheck = Get-Command npx -ErrorAction SilentlyContinue
 if ($nodeCheck -and (Test-Path $originalAsar)) {
     try {
         $checkTemp = Join-Path $tempDir "check_extract"
-        & npx --yes @electron/asar extract $originalAsar $checkTemp
+        & npx --yes asar extract $originalAsar $checkTemp
         $checkPreload = Join-Path $checkTemp "dist\preload.js"
         if (Test-Path $checkPreload) {
             $preloadText = Get-Content -Path $checkPreload -Raw
@@ -77,7 +77,7 @@ try {
             $asarTemp = Join-Path $tempDir "asar_extracted"
             
             Write-Host "Extracting your local app.asar..." -ForegroundColor Gray
-            & npx --yes @electron/asar extract $backupAsar $asarTemp
+            & npx --yes asar extract $backupAsar $asarTemp
             
             Write-Host "Injecting localized preload.js..." -ForegroundColor Gray
             $targetPreload = Join-Path $asarTemp "dist\preload.js"
@@ -107,7 +107,7 @@ try {
             }
             
             Write-Host "Repacking app.asar..." -ForegroundColor Gray
-            & npx --yes @electron/asar pack $asarTemp $originalAsar
+            & npx --yes asar pack $asarTemp $originalAsar
             
             Write-Host "Dynamic injection applied successfully!" -ForegroundColor Green
             $patchedSuccessfully = $true
