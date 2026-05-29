@@ -602,52 +602,6 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     return null;
   }
 
-  function injectStyles() {
-    try {
-      const styleId = 'antigravity-premium-styles';
-      if (document.getElementById(styleId)) return;
-      
-      const style = document.createElement('style');
-      style.id = styleId;
-      style.textContent = `
-        /* Premium sleek typography from Google Fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        body, button, input, select, textarea, .agent-chat, .pane, * {
-          font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        }
-        
-        /* Modern scrollbar override for absolute elegance */
-        ::-webkit-scrollbar {
-          width: 6px !important;
-          height: 6px !important;
-        }
-        ::-webkit-scrollbar-track {
-          background: transparent !important;
-        }
-        ::-webkit-scrollbar-thumb {
-          background: rgba(120, 120, 120, 0.15) !important;
-          border-radius: 99px !important;
-          border: 1px solid transparent !important;
-          background-clip: padding-box !important;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-          background: rgba(120, 120, 120, 0.35) !important;
-          border: 1px solid transparent !important;
-          background-clip: padding-box !important;
-        }
-        
-        /* Smooth transitions for high-end micro-animations */
-        .thinking-steps, .agent-status, .pulse-dot {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-      `;
-      document.documentElement.appendChild(style);
-    } catch (e) {
-      console.warn('Failed to inject premium styles:', e);
-    }
-  }
-
   function walk(node) {
     if (!node) return;
     if (node.nodeType === 3) { // Node.TEXT_NODE
@@ -783,12 +737,10 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
   // Hook into DOM loading
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      injectStyles();
       walk(document.body);
       startObserver();
     });
   } else {
-    injectStyles();
     walk(document.body);
     startObserver();
   }

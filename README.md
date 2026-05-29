@@ -1,17 +1,16 @@
-# Antigravity-Chinese-Patch（Antigravity 中文汉化补丁 & 视觉美化包）
+# Antigravity-Chinese-Patch（Antigravity 中文汉化补丁）
 
 <p align="center">
   <a href="https://github.com/good9527/Antigravity-Chinese-Patch">
     <img src="https://img.shields.io/badge/Language-Chinese%20%26%20English-brightgreen.svg?style=for-the-badge" alt="Bilingual Support">
     <img src="https://img.shields.io/badge/Platform-Windows%2010%2F11-blue.svg?style=for-the-badge" alt="Platform Support">
-    <img src="https://img.shields.io/badge/Style-Premium%20Outfit%20Typography-purple.svg?style=for-the-badge" alt="Outfit Styling">
     <img src="https://img.shields.io/badge/License-MIT-orange.svg?style=for-the-badge" alt="MIT License">
   </a>
 </p>
 
-这是一个针对 Google 出品的强大智能体编码助手 **Antigravity** 桌面客户端的开源无损汉化补丁、精美视觉美化包与动态扫描引擎。
+这是一个针对 Google 出品的强大智能体编码助手 **Antigravity** 桌面客户端的开源无损汉化补丁与动态扫描引擎。
 
-This is an open-source, non-destructive Chinese localization patch, premium typography visual enhancer, and dynamic DOM scanner engine for **Antigravity**, the powerful agentic AI coding assistant desktop client by Google.
+This is an open-source, non-destructive Chinese localization patch and dynamic DOM scanner engine for **Antigravity**, the powerful agentic AI coding assistant desktop client by Google.
 
 ---
 
@@ -22,18 +21,13 @@ This is an open-source, non-destructive Chinese localization patch, premium typo
 - **下拉菜单完全覆盖**：针对 React 列表中特殊的 `\u00a0`（不换行空格）编码进行了入口标准化处理，实现 `"Full Machine"` $\rightarrow$ **“整机授权”** 的完美翻译。
 - **设置中心全覆盖**：翻译了 100% 的设置描述、模型余额面板、快捷键功能表和问题反馈页面。
 
-### 🎨 奢华视觉美化包 | Premium Visual Enhancements (New ✨)
-- **高级现代字体（Outfit & Inter）**：补丁会自动挂载 Google 顶级现代字体 **Outfit** 和 **Inter**，取代系统默认的粗糙字体，使客户端的文字排版瞬间呈现高级感和呼吸感。
-- **精致极简滚动条**：重写了 Windows 默认的粗大、生硬滚动条，替换为圆角、超薄且支持智能悬停渐变的优雅滚动条，带给您丝滑顺畅的极客操作体验。
-- **平滑微动画过渡**：对智能体的思考计时、进度状态和指示灯新增了平滑过渡的微动画效果，让交互界面显得更具灵性与活力。
-
 ### ☁️ 云端字典自动升级 | Live Cloud Updates
 - **零延迟启动与热升级**：本补丁采用 `localStorage` 建立本地字典缓存。每次启动时在后台**异步自动拉取 GitHub 最新翻译词库**（`dictionary.json`）并静默合并，**无需重新运行补丁即可享受到最新的翻译校对！**
 - **网络防断性兜底**：在离线或 GitHub 网络受限时，补丁自动无缝切换为内置离线字典，100% 可靠。
 
 ### 🛡️ 绝对稳定与安全（非破坏性追加） | Absolute Stability & Safety
 - **主进程 0 修改**：补丁代码 **100% 隔离在渲染进程的注入层 (`preload.js`) 中**。我们保持客户端核心二进制文件和主进程 Node.js 原始状态不变，**绝对不会导致客户端闪退或更新损坏**。
-- **动态追加机制**：不覆盖客户端原版 preload 代码，而是采用在原版文件末尾追加挂载汉化函数的机制。官方所有的 IPC 和内部通道 100% 完整保留，**完美兼容未来一切官方版本升级，永不冲突闪退**。
+- **动态追加机制**：不覆盖客户端原版 preload 代码，而是采用在原版文件末尾追加挂载汉化函数的机制。官方所有的 IPC 和 internal 通道 100% 完整保留，**完美兼容未来一切官方版本升级，永不冲突闪退**。
 - **智能自愈备份**：在官方更新或重新安装软件后，补丁脚本能自动识别并刷新备份库，始终保留一份最干净的官方原版，支持一键无损还原。
 
 ---
@@ -67,7 +61,7 @@ iwr -useb https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/m
 ---
 
 ### 方式 C：极客/开发者（本地动态注入）| Method C: Developers (Dynamic Local Injection)
-如果您安装了 Node.js，我们的安装脚本会自动启用 **ASAR 动态注入模式**！它会动态提取您当前的 `app.asar`，仅将汉化与美化脚本注入其中并重新打包。
+如果您安装了 Node.js，我们的安装脚本会自动启用 **ASAR 动态注入模式**！它会动态提取您当前的 `app.asar`，仅将汉化脚本注入其中并重新打包。
 
 1. 克隆本仓库：
    ```bash
@@ -82,7 +76,7 @@ iwr -useb https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/m
 ```text
 Antigravity-Chinese-Patch/
 ├── dist/
-│   ├── preload.js          # 核心汉化注入脚本 (包含 Outfit 视觉美化包 & 动态云端字典自愈)
+│   ├── preload.js          # 核心汉化注入脚本 (支持本地/云端双轨自愈)
 │   └── dictionary.json     # 云端共享 JSON 汉化字典 (便于社区维护贡献)
 ├── 安装汉化补丁.bat          # Windows 一键执行批处理文件 (启动 Elite Toolkit 菜单)
 ├── patch_antigravity.ps1   # 交互式 Elite Toolkit 控制台管理 PowerShell 脚本
