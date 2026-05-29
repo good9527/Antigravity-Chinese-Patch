@@ -698,9 +698,38 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
         }
       });
     }
+  // Dynamic Cloud Dictionary Auto-Updater (Cached via localStorage for instant startup)
+  try {
+    const cachedDict = localStorage.getItem('antigravity_chinese_patch_dict');
+    if (cachedDict) {
+      const data = JSON.parse(cachedDict);
+      Object.assign(dictionary, data);
+    }
   } catch (e) {
-    console.error('Failed to patch document.title:', e);
+    console.error('Failed to load cached cloud dictionary:', e);
   }
+
+  // Fetch the latest dictionary in the background
+  fetch('https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/dist/dictionary.json')
+    .then(res => {
+      if (res.ok) return res.json();
+      throw new Error('Network response was not ok');
+    })
+    .then(data => {
+      if (data && typeof data === 'object') {
+        localStorage.setItem('antigravity_chinese_patch_dict', JSON.stringify(data));
+        Object.assign(dictionary, data);
+        console.log('Antigravity Chinese Patch: Cloud dictionary updated successfully! Total keys: ' + Object.keys(data).length);
+        
+        // Force refresh current body translation to apply updates instantly
+        if (document.body) {
+          walk(document.body);
+        }
+      }
+    })
+    .catch(err => {
+      console.warn('Antigravity Chinese Patch: Cloud update failed or offline. Using local dictionary. Details:', err);
+    });
 
   // Hook into DOM loading
   if (document.readyState === 'loading') {
