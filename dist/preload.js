@@ -384,7 +384,17 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     ' to be installed. The browser subagent can be invoked by typing /browser in the conversation input box.': '。您可以在输入框中输入 /browser 来召唤浏览器助手。',
     'View your available model quota and AI credits. Model quota refreshes periodically based on your plan. Enable AI Credit Overages to continue using models when your quota is exhausted.': '查看您可用的模型配额和 AI 点数。模型配额会根据您的订阅计划定期重置。开启允许超出额度后扣除点数，可在配额耗尽后继续使用模型。',
     'Light Theme': '浅色主题',
-    'Dark Theme': '深色主题'
+    'Dark Theme': '深色主题',
+    'Clear All': '清除全部',
+    'Clear History': '清除历史记录',
+    'Search': '搜索',
+    'Copy': '复制',
+    'Copied!': '已复制！',
+    'Stop generating': '停止生成',
+    'Regenerate': '重新生成',
+    'Retry': '重试',
+    'Advanced Settings': '高级设置',
+    'Updates': '更新'
   };
 
   const substringReplacements = [
