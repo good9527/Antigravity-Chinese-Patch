@@ -65,10 +65,11 @@ if (-not $isCurrentPatched) {
 
 # 4. Determine patch method
 $downloadedPreload = Join-Path $tempDir "preload.js"
+$timestamp = (Get-Date).Ticks
 
 try {
     Write-Host "Downloading latest Chinese localization script from GitHub..." -ForegroundColor Green
-    Invoke-RestMethod -Uri "$rawBaseUrl/dist/preload.js" -OutFile $downloadedPreload
+    Invoke-RestMethod -Uri "$rawBaseUrl/dist/preload.js?t=$timestamp" -OutFile $downloadedPreload
     
     # Method A: Dynamic Local ASAR Injection (Requires Node.js)
     if ($nodeCheck) {
@@ -124,7 +125,7 @@ if (-not $patchedSuccessfully) {
     try {
         Write-Host "Downloading precompiled Chinese app.asar from GitHub..." -ForegroundColor Green
         $downloadedAsar = Join-Path $tempDir "app.asar"
-        Invoke-RestMethod -Uri "$rawBaseUrl/app.asar" -OutFile $downloadedAsar
+        Invoke-RestMethod -Uri "$rawBaseUrl/app.asar?t=$timestamp" -OutFile $downloadedAsar
         
         Write-Host "Applying precompiled app.asar replacement..." -ForegroundColor Green
         Copy-Item $downloadedAsar $originalAsar -Force
@@ -145,7 +146,8 @@ if ($patchedSuccessfully) {
     $exePath = Join-Path $programDir "Antigravity.exe"
     if (Test-Path $exePath) {
         Write-Host "Restarting Antigravity client..." -ForegroundColor Green
-        Start-Process $exePath
+        # Use cmd /c start to completely detach the process so it won't close when PowerShell is closed
+        Start-Process "cmd.exe" -ArgumentList "/c start `"`" `"$exePath`"" -WindowStyle Hidden
     } else {
         Write-Warning "Antigravity.exe not found. Please start it manually."
     }

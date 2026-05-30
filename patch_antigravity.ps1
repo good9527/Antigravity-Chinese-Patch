@@ -35,7 +35,8 @@ Function Start-Client {
     $exePath = Join-Path $programDir "Antigravity.exe"
     if (Test-Path $exePath) {
         Write-Host "Restarting Antigravity client..." -ForegroundColor Green
-        Start-Process $exePath
+        # Use cmd /c start to completely detach the process so it won't close when PowerShell is closed
+        Start-Process "cmd.exe" -ArgumentList "/c start `"`" `"$exePath`"" -WindowStyle Hidden
     } else {
         Write-Warning "Antigravity.exe not found. Please start it manually."
     }
