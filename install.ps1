@@ -38,21 +38,9 @@ if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir -ErrorAction Sile
 New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
 
 $isCurrentPatched = $false
-$nodeCheck = Get-Command npx -ErrorAction SilentlyContinue
-if ($nodeCheck -and (Test-Path $originalAsar)) {
-    try {
-        $checkTemp = Join-Path $tempDir "check_extract"
-        & npx --yes asar extract $originalAsar $checkTemp
-        $checkPreload = Join-Path $checkTemp "dist\preload.js"
-        if (Test-Path $checkPreload) {
-            $preloadText = Get-Content -Path $checkPreload -Raw
-            if ($preloadText -like "*Antigravity Chinese Localization Patch*") {
-                $isCurrentPatched = $true
-            }
-        }
-        if (Test-Path $checkTemp) { Remove-Item -Recurse -Force $checkTemp -ErrorAction SilentlyContinue }
-    } catch {
-        # Fallback if check extraction fails
+if (Test-Path $originalAsar) {
+    if (Select-String -Path $originalAsar -Pattern "Antigravity Chinese Localization Patch" -Quiet) {
+        $isCurrentPatched = $true
     }
 }
 
@@ -86,11 +74,18 @@ try {
                 # Load original preload.js
                 $originalPreloadContent = Get-Content -Path $targetPreload -Raw
                 
+                # Check if it was already patched, and if so, strip the old patch
+                $patchMarker = "// Antigravity Chinese Localization Patch"
+                $existingMarkerIndex = $originalPreloadContent.IndexOf($patchMarker)
+                if ($existingMarkerIndex -ge 0) {
+                    Write-Host "Found existing patch in preload.js. Removing it before updating..." -ForegroundColor Gray
+                    $originalPreloadContent = $originalPreloadContent.Substring(0, $existingMarkerIndex).Trim()
+                }
+                
                 # Load downloaded patch
                 $downloadedContent = Get-Content -Path $downloadedPreload -Raw
                 
                 # Extract patch IIFE
-                $patchMarker = "// Antigravity Chinese Localization Patch"
                 $markerIndex = $downloadedContent.IndexOf($patchMarker)
                 if ($markerIndex -ge 0) {
                     $patchCode = $downloadedContent.Substring($markerIndex)
@@ -108,7 +103,7 @@ try {
             }
             
             Write-Host "Repacking app.asar..." -ForegroundColor Gray
-            & npx --yes asar pack $asarTemp $originalAsar
+            & npx --yes asar pack $asarTemp $originalAsar --unpack-dir "**/chrome-devtools-mcp"
             
             Write-Host "Dynamic injection applied successfully!" -ForegroundColor Green
             $patchedSuccessfully = $true

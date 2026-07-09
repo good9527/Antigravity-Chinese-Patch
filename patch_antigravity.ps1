@@ -79,21 +79,9 @@ Function Apply-Patch {
     New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
 
     $isCurrentPatched = $false
-    $nodeCheck = Get-Command npx -ErrorAction SilentlyContinue
-    if ($nodeCheck -and (Test-Path $originalAsar)) {
-        try {
-            $checkTemp = Join-Path $tempDir "check_extract"
-            & npx --yes asar extract $originalAsar $checkTemp
-            $checkPreload = Join-Path $checkTemp "dist\preload.js"
-            if (Test-Path $checkPreload) {
-                $preloadText = Get-Content -Path $checkPreload -Raw
-                if ($preloadText -like "*Antigravity Chinese Localization Patch*") {
-                    $isCurrentPatched = $true
-                }
-            }
-            if (Test-Path $checkTemp) { Remove-Item -Recurse -Force $checkTemp -ErrorAction SilentlyContinue }
-        } catch {
-            # Fallback if check extraction fails
+    if (Test-Path $originalAsar) {
+        if (Select-String -Path $originalAsar -Pattern "Antigravity Chinese Localization Patch" -Quiet) {
+            $isCurrentPatched = $true
         }
     }
 
@@ -114,12 +102,20 @@ Function Apply-Patch {
                 Write-Host "Extracting local app.asar..." -ForegroundColor Gray
                 & npx --yes asar extract $backupAsar $asarTemp
                 
-                Write-Host "Injecting Chinese preload.js..." -ForegroundColor Gray
+                Write-Host "Inject Chinese preload.js..." -ForegroundColor Gray
                 $targetPreload = Join-Path $asarTemp "dist\preload.js"
                 if (Test-Path $targetPreload) {
                     $originalPreloadContent = Get-Content -Path $targetPreload -Raw
-                    $localContent = Get-Content -Path $localPreloadJs -Raw
+                    
+                    # Check if it was already patched, and if so, strip the old patch
                     $patchMarker = "// Antigravity Chinese Localization Patch"
+                    $existingMarkerIndex = $originalPreloadContent.IndexOf($patchMarker)
+                    if ($existingMarkerIndex -ge 0) {
+                        Write-Host "Found existing patch in preload.js. Removing it before updating..." -ForegroundColor Gray
+                        $originalPreloadContent = $originalPreloadContent.Substring(0, $existingMarkerIndex).Trim()
+                    }
+                    
+                    $localContent = Get-Content -Path $localPreloadJs -Raw
                     $markerIndex = $localContent.IndexOf($patchMarker)
                     if ($markerIndex -ge 0) {
                         $patchCode = $localContent.Substring($markerIndex)
@@ -135,7 +131,7 @@ Function Apply-Patch {
                 }
                 
                 Write-Host "Repacking app.asar..." -ForegroundColor Gray
-                & npx --yes asar pack $asarTemp $originalAsar
+                & npx --yes asar pack $asarTemp $originalAsar --unpack-dir "**/chrome-devtools-mcp"
                 
                 if (Test-Path $asarTemp) { Remove-Item -Recurse -Force $asarTemp -ErrorAction SilentlyContinue }
                 Write-Host "Dynamic injection applied successfully!" -ForegroundColor Green
@@ -213,31 +209,26 @@ Function Check-Status {
         # Check if patched
         $isPatched = "Unpatched (原装未汉化)"
         $patchedColor = "Green"
+        if (Select-String -Path $originalAsar -Pattern "Antigravity Chinese Localization Patch" -Quiet) {
+            $isPatched = "Patched (已汉化)"
+            $patchedColor = "Cyan"
+        }
+        
         $nodeCheck = Get-Command npx -ErrorAction SilentlyContinue
         if ($nodeCheck) {
             try {
                 $tempDir = Join-Path $env:TEMP "antigravity_inspect_temp"
                 if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue }
                 & npx --yes asar extract $originalAsar $tempDir
-                $preloadPath = Join-Path $tempDir "dist\preload.js"
                 $packagePath = Join-Path $tempDir "package.json"
                 
                 if (Test-Path $packagePath) {
                     $pkg = Get-Content $packagePath | ConvertFrom-Json
                     Write-Host "Client Version: $($pkg.version)" -ForegroundColor White
                 }
-                
-                if (Test-Path $preloadPath) {
-                    $preloadText = Get-Content -Path $preloadPath -Raw
-                    if ($preloadText -like "*Antigravity Chinese Localization Patch*") {
-                        $isPatched = "Patched (已汉化)"
-                        $patchedColor = "Cyan"
-                    }
-                }
                 if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue }
             } catch {
-                $isPatched = "Unknown (Check failed)"
-                $patchedColor = "Yellow"
+                # Ignore version check errors
             }
         }
         Write-Host "Patch Status: $isPatched" -ForegroundColor $patchedColor

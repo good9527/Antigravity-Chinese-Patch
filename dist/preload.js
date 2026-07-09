@@ -491,7 +491,6 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
       let newText = trimmed;
       newText = newText.replace('Refreshes in', '额度重置倒计时：');
       newText = newText.replace('hours', '小时');
-      newText = newText.replace('minutes', '浅色' === '' ? '分钟' : '分钟'); // dummy to keep simple replace
       newText = newText.replace('minutes', '分钟');
       newText = newText.replace('hour', '小时');
       newText = newText.replace('minute', '分钟');
@@ -668,6 +667,11 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
           const translated = translateText(target.placeholder);
           if (translated !== null) {
             target.placeholder = translated;
+          }
+        } else if (mutation.attributeName === 'value' && target.tagName === 'INPUT' && (target.type === 'button' || target.type === 'submit')) {
+          const translated = translateText(target.value);
+          if (translated !== null) {
+            target.value = translated;
           }
         }
       }

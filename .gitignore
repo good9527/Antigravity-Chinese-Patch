@@ -11,3 +11,5 @@ find_ui_strings.js
 main.js
 updater.js
 *.asar
+app.asar.unpacked/
+
