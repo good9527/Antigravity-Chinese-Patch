@@ -1,73 +1,74 @@
-# Antigravity-Chinese-Patch（Antigravity 中文汉化补丁）
+# Antigravity-Chinese-Patch（Antigravity 全平台通用中文汉化补丁）
 
 <p align="center">
   <a href="https://github.com/good9527/Antigravity-Chinese-Patch">
     <img src="https://img.shields.io/badge/Language-Chinese%20%26%20English-brightgreen.svg?style=for-the-badge" alt="Bilingual Support">
-    <img src="https://img.shields.io/badge/Platform-Windows%2010%2F11-blue.svg?style=for-the-badge" alt="Platform Support">
-    <img src="https://img.shields.io/badge/License-MIT-orange.svg?style=for-the-badge" alt="MIT License">
+    <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue.svg?style=for-the-badge" alt="Platform Support">
+    <img src="https://img.shields.io/badge/Engine-Zero--Dependency%20Native%20Patcher-orange.svg?style=for-the-badge" alt="Native Engine">
+    <img src="https://img.shields.io/badge/License-MIT-purple.svg?style=for-the-badge" alt="MIT License">
   </a>
 </p>
 
-这是一个针对 Google 出品的强大智能体编码助手 **Antigravity** 桌面客户端的开源无损汉化补丁与动态扫描引擎。
+这是一个针对 Google 出品的强大智能体编码助手 **Antigravity** 桌面客户端的开源无损汉化补丁与通用动态扫描引擎。
 
-This is an open-source, non-destructive Chinese localization patch and dynamic DOM scanner engine for **Antigravity**, the powerful agentic AI coding assistant desktop client by Google.
+This is an open-source, zero-dependency, universal non-destructive Chinese localization patch and dynamic DOM scanner engine for **Antigravity** (Windows / macOS / Linux).
 
 ---
 
 ## 🌟 核心特性 | Features
 
-### 🇨🇳 100% 完美汉化 | 100% Deep Localization
-- **动态状态秒级同步**：完美覆盖 React 高频刷新的动态状态计时器（例如 `Thinking for 1s` $\rightarrow$ `思考中 (1秒)`，`Working for 2.5s` $\rightarrow$ `处理中 (2.5秒)`）。
-- **下拉菜单完全覆盖**：针对 React 列表中特殊的 `\u00a0`（不换行空格）编码进行了入口标准化处理，实现 `"Full Machine"` $\rightarrow$ **“整机授权”** 的完美翻译。
-- **设置中心全覆盖**：翻译了 100% 的设置描述、模型余额面板、快捷键功能表和问题反馈页面。
+### 🇨🇳 100% 深度汉化与动态同步 | 100% Deep Localization
+- **动态状态秒级同步**：完美覆盖 React 高频刷新的动态状态计时器（例如 `Thinking for 1s` $\rightarrow$ `思考中 (1秒)`，`Working for 2.5s` $\rightarrow$ `处理中 (2.5秒)`，`Timed 5s` $\rightarrow$ `已计时 5 秒`）。
+- **全属性覆盖**：支持 `placeholder`、`title`（悬停气泡）、`aria-label` 以及特殊下拉菜单（`\u00a0` 不换行空格标准化处理）。
+- **设置与模型中心全覆盖**：翻译了 100% 的设置描述、模型余额面板、权限控制、快捷键功能表和问题反馈页面。
 
-### ☁️ 云端字典自动升级 | Live Cloud Updates
-- **零延迟启动与热升级**：本补丁采用 `localStorage` 建立本地字典缓存。每次启动时在后台**异步自动拉取 GitHub 最新翻译词库**（`dictionary.json`）并静默合并，**无需重新运行补丁即可享受到最新的翻译校对！**
-- **网络防断性兜底**：在离线或 GitHub 网络受限时，补丁自动无缝切换为内置离线字典，100% 可靠。
+### ⚡ 纯原生零依赖内存注入 | Zero-Dependency In-Place Native Engine
+- **无需安装 Node.js / Python**：Windows 端基于 .NET 内存级 ASAR 补丁引擎，**0.05 秒极速注入**，告别繁重的依赖安装。
+- **100% 保留原生宿主文件**：不直接替换官方 `app.asar` 二进制文件，而是动态提取用户本机当前版本的 `preload.js` 追加注入，**永不产生版本冲突，完美兼容未来一切官方升级**。
+- **全平台原生支持**：不仅支持 Windows 10/11，还同步支持 **macOS** 与 **Linux**。
 
-### 🛡️ 绝对稳定与安全（非破坏性追加） | Absolute Stability & Safety
-- **主进程 0 修改**：补丁代码 **100% 隔离在渲染进程的注入层 (`preload.js`) 中**。我们保持客户端核心二进制文件和主进程 Node.js 原始状态不变，**绝对不会导致客户端闪退或更新损坏**。
-- **动态追加机制**：不覆盖客户端原版 preload 代码，而是采用在原版文件末尾追加挂载汉化函数的机制。官方所有的 IPC 和 internal 通道 100% 完整保留，**完美兼容未来一切官方版本升级，永不冲突闪退**。
-- **智能自愈备份**：在官方更新或重新安装软件后，补丁脚本能自动识别并刷新备份库，始终保留一份最干净的官方原版，支持一键无损还原。
+### 🚀 全球 / 国内多 CDN 智能测速容灾 | Multi-CDN Fast Mirror Fallback
+- **国内极速直连**：内置 Fastly jsDelivr、Cloudflare 镜像与 GitHub Raw 自动测速故障转移，无论身处何种网络环境，一键安装与字典拉取均稳定顺畅。
+- **云端字典热同步**：启动时后台异步静默获取最新翻译词条并本地缓存，无需重新打补丁即可享受持续校对更新。
 
 ---
 
 ## 💾 快速安装指南 | Installation Guide
 
-> [!IMPORTANT]
-> **本补丁已实现完全通用化！** 脚本会自动解析您系统的 AppData 目录和当前运行路径，适用于任何 Windows 用户。
+### 🪟 Windows 用户 | Windows Users
 
-### 方式 A：云端一键在线安装（最简单、最智能 ⭐⭐⭐）| Method A: Online Web Installer (Easiest)
-不需要手动下载任何安装包！直接在 Windows 中以管理员身份打开 **PowerShell** 窗口，复制并运行以下命令，即可在 5 秒内完成全自动云端极速汉化与热启动：
+#### 方式 A：PowerShell 一键在线安装（推荐 ⭐⭐⭐）
+以管理员身份打开 **PowerShell** 窗口，复制并运行以下命令（内置国内 CDN 加速，5 秒极速完成）：
 
+```powershell
+iwr -useb https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1 | iex
+```
+
+*(备用 GitHub 官方源)*：
 ```powershell
 iwr -useb https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/install.ps1 | iex
 ```
 
 ---
 
-### 方式 B：本地一键管理工具（交互式、多功能 ⭐⭐⭐）| Method B: Local Interactive Manager
-我们为本地用户开发了非常炫酷的 **Elite Toolkit 控制台管理面板**，提供汉化、升级、卸载一站式管理：
-
-1. 前往 [Releases](https://github.com/good9527/Antigravity-Chinese-Patch/releases) 页面，下载最新的汉化压缩包。
-2. 将压缩包内的所有文件（`dist/` 目录、`安装汉化补丁.bat` 和 `patch_antigravity.ps1`）解压至任意目录。
-3. **双击运行 `安装汉化补丁.bat`**。
-4. 控制台将展示精美的交互菜单：
-   - 输入 `1` 🚀 **一键极速汉化/更新**
-   - 输入 `2` 🛡️ **一键卸载补丁并还原官方原装**
-   - 输入 `3` 🔍 **检查当前汉化状态与软件版本**
-   - 输入 `4` 🚪 **退出控制台**
+#### 方式 B：本地交互式管理面板 (Elite Toolkit v3.0)
+1. 前往 [Releases](https://github.com/good9527/Antigravity-Chinese-Patch/releases) 页面下载最新压缩包。
+2. 解压后**双击运行 `安装汉化补丁.bat`**。
+3. 交互菜单支持：
+   - `1` 🚀 **一键极速汉化 / 升级**
+   - `2` 🛡️ **一键恢复官方原版备份**
+   - `3` 🔍 **检查当前版本与汉化状态**
+   - `4` 🚪 **退出管理面板**
 
 ---
 
-### 方式 C：极客/开发者（本地动态注入）| Method C: Developers (Dynamic Local Injection)
-如果您安装了 Node.js，我们的安装脚本会自动启用 **ASAR 动态注入模式**！它会动态提取您当前的 `app.asar`，仅将汉化脚本注入其中并重新打包。
+### 🍎 macOS / 🐧 Linux 用户 | macOS & Linux Users
 
-1. 克隆本仓库：
-   ```bash
-   git clone https://github.com/good9527/Antigravity-Chinese-Patch.git
-   ```
-2. 在仓库根目录下双击运行 `安装汉化补丁.bat`，选择 `1` 进行本地动态注入。
+打开 Terminal 终端，运行以下一键安装命令：
+
+```bash
+curl -fsSL https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.sh | bash
+```
 
 ---
 
@@ -76,12 +77,13 @@ iwr -useb https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/m
 ```text
 Antigravity-Chinese-Patch/
 ├── dist/
-│   ├── preload.js          # 核心汉化注入脚本 (支持本地/云端双轨自愈)
-│   └── dictionary.json     # 云端共享 JSON 汉化字典 (便于社区维护贡献)
-├── 安装汉化补丁.bat          # Windows 一键执行批处理文件 (启动 Elite Toolkit 菜单)
-├── patch_antigravity.ps1   # 交互式 Elite Toolkit 控制台管理 PowerShell 脚本
-├── install.ps1             # 云端一键在线安装核心脚本 (支持最新 asar 命令打包)
-└── README.md               # 项目双语使用说明书
+│   ├── preload.js          # 核心汉化引擎 (支持多 CDN 容灾热更新)
+│   └── dictionary.json     # 云端共享 JSON 汉化词典
+├── 安装汉化补丁.bat          # Windows 交互式一键批处理启动脚本
+├── patch_antigravity.ps1   # Windows Elite Toolkit 控制台管理脚本
+├── install.ps1             # Windows 零依赖一键在线安装核心脚本 (原生 .NET ASAR 引擎)
+├── install.sh              # macOS / Linux 通用一键在线安装脚本 (原生 Python 引擎)
+└── README.md               # 项目全平台使用说明文档
 ```
 
 ---

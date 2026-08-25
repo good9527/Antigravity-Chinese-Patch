@@ -629,6 +629,18 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
           node.placeholder = translated;
         }
       }
+      if (node.title) {
+        const translated = translateText(node.title);
+        if (translated !== null) {
+          node.title = translated;
+        }
+      }
+      if (node.getAttribute && node.getAttribute('aria-label')) {
+        const translated = translateText(node.getAttribute('aria-label'));
+        if (translated !== null) {
+          node.setAttribute('aria-label', translated);
+        }
+      }
       if (node.tagName === 'INPUT' && (node.type === 'button' || node.type === 'submit')) {
         const translated = translateText(node.value);
         if (translated !== null) {
@@ -668,6 +680,16 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
           if (translated !== null) {
             target.placeholder = translated;
           }
+        } else if (mutation.attributeName === 'title' && target.title) {
+          const translated = translateText(target.title);
+          if (translated !== null) {
+            target.title = translated;
+          }
+        } else if (mutation.attributeName === 'aria-label' && target.getAttribute && target.getAttribute('aria-label')) {
+          const translated = translateText(target.getAttribute('aria-label'));
+          if (translated !== null) {
+            target.setAttribute('aria-label', translated);
+          }
         } else if (mutation.attributeName === 'value' && target.tagName === 'INPUT' && (target.type === 'button' || target.type === 'submit')) {
           const translated = translateText(target.value);
           if (translated !== null) {
@@ -685,7 +707,7 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
       subtree: true,
       characterData: true,
       attributes: true,
-      attributeFilter: ['placeholder', 'value']
+      attributeFilter: ['placeholder', 'value', 'title', 'aria-label']
     });
   }
 
@@ -719,6 +741,7 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
   } catch (e) {
     console.error('Failed to hook document title:', e);
   }
+
   // Dynamic Cloud Dictionary Auto-Updater (Cached via localStorage for instant startup)
   try {
     const cachedDict = localStorage.getItem('antigravity_chinese_patch_dict');
@@ -730,27 +753,38 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     console.error('Failed to load cached cloud dictionary:', e);
   }
 
-  // Fetch the latest dictionary in the background
-  fetch('https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/dist/dictionary.json')
-    .then(res => {
-      if (res.ok) return res.json();
-      throw new Error('Network response was not ok');
-    })
-    .then(data => {
-      if (data && typeof data === 'object') {
-        localStorage.setItem('antigravity_chinese_patch_dict', JSON.stringify(data));
-        Object.assign(dictionary, data);
-        console.log('Antigravity Chinese Patch: Cloud dictionary updated successfully! Total keys: ' + Object.keys(data).length);
-        
-        // Force refresh current body translation to apply updates instantly
-        if (document.body) {
-          walk(document.body);
+  // Fetch the latest dictionary in the background with multi-CDN fallback
+  const cdnMirrors = [
+    'https://testingcf.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/dist/dictionary.json',
+    'https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/dist/dictionary.json',
+    'https://ghfast.top/https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/dist/dictionary.json',
+    'https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/dist/dictionary.json'
+  ];
+
+  async function updateCloudDictionary() {
+    for (const url of cdnMirrors) {
+      try {
+        const res = await fetch(url + '?t=' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data === 'object') {
+            localStorage.setItem('antigravity_chinese_patch_dict', JSON.stringify(data));
+            Object.assign(dictionary, data);
+            console.log('Antigravity Chinese Patch: Cloud dictionary updated via ' + url + '! Total keys: ' + Object.keys(data).length);
+            if (document.body) {
+              walk(document.body);
+            }
+            return;
+          }
         }
+      } catch (err) {
+        // Continue to next mirror
       }
-    })
-    .catch(err => {
-      console.warn('Antigravity Chinese Patch: Cloud update failed or offline. Using local dictionary. Details:', err);
-    });
+    }
+    console.warn('Antigravity Chinese Patch: All cloud update mirrors unreachable. Using local dictionary.');
+  }
+
+  updateCloudDictionary();
 
   // Hook into DOM loading
   if (document.readyState === 'loading') {

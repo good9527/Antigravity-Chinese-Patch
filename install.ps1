@@ -1,42 +1,106 @@
 # install.ps1
-# One-click Online Installer for Antigravity-Chinese-Patch
-# Can be run via: iwr -useb https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/install.ps1 | iex
+# One-click Universal Online Web Installer for Antigravity-Chinese-Patch
+# PowerShell: iwr -useb https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
 
-$repoOwner = "good9527"
-$repoName = "Antigravity-Chinese-Patch"
-$rawBaseUrl = "https://raw.githubusercontent.com/$repoOwner/$repoName/main"
-
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "     Antigravity Chinese Patch Web Installer              " -ForegroundColor Cyan
+Write-Host "     Antigravity Chinese Patch Universal Web Installer    " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# 1. Resolve local AppData path
-$programDir = "$env:LOCALAPPDATA\Programs\antigravity"
+# 1. Fast CDN Multi-Mirror Downloader
+$repoOwner = "good9527"
+$repoName = "Antigravity-Chinese-Patch"
+$timestamp = (Get-Date).Ticks
+
+Function Get-CdnFile($relativePath, $destinationPath) {
+    $mirrors = @(
+        "https://fastly.jsdelivr.net/gh/$repoOwner/$repoName@main/$relativePath`?t=$timestamp",
+        "https://testingcf.jsdelivr.net/gh/$repoOwner/$repoName@main/$relativePath`?t=$timestamp",
+        "https://ghfast.top/https://raw.githubusercontent.com/$repoOwner/$repoName/main/$relativePath`?t=$timestamp",
+        "https://raw.githubusercontent.com/$repoOwner/$repoName/main/$relativePath`?t=$timestamp"
+    )
+    
+    foreach ($url in $mirrors) {
+        try {
+            Write-Host "Connecting to mirror: $url ..." -ForegroundColor Gray
+            Invoke-RestMethod -Uri $url -OutFile $destinationPath -TimeoutSec 10
+            if ((Test-Path $destinationPath) -and (Get-Item $destinationPath).Length -gt 100) {
+                Write-Host "Successfully downloaded from mirror!" -ForegroundColor Green
+                return $true
+            }
+        } catch {
+            Write-Warning "Mirror connection failed or timed out. Trying next mirror..."
+        }
+    }
+    return $false
+}
+
+# 2. Smart Path Resolver (Active Process -> Registry -> Default Folders)
+Function Find-AntigravityPath {
+    # 2.1 Check active process
+    $proc = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($proc -and $proc.Path) {
+        $dir = Split-Path -Parent $proc.Path
+        if (Test-Path (Join-Path $dir "resources\app.asar")) { return $dir }
+    }
+
+    # 2.2 Check default user directory
+    $userPath = "$env:LOCALAPPDATA\Programs\antigravity"
+    if (Test-Path (Join-Path $userPath "resources\app.asar")) { return $userPath }
+
+    # 2.3 Check Program Files
+    $pfPath = "$env:ProgramFiles\Antigravity"
+    if (Test-Path (Join-Path $pfPath "resources\app.asar")) { return $pfPath }
+    
+    $pfx86Path = "${env:ProgramFiles(x86)}\Antigravity"
+    if (Test-Path (Join-Path $pfx86Path "resources\app.asar")) { return $pfx86Path }
+
+    # 2.4 Check Windows Registry Uninstall entries
+    $regRoots = @(
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
+        "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
+        "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+    )
+    foreach ($root in $regRoots) {
+        $apps = Get-ItemProperty $root -ErrorAction SilentlyContinue
+        foreach ($app in $apps) {
+            if ($app.DisplayName -like "*Antigravity*" -and $app.InstallLocation) {
+                if (Test-Path (Join-Path $app.InstallLocation "resources\app.asar")) {
+                    return $app.InstallLocation
+                }
+            }
+        }
+    }
+    return $null
+}
+
+$programDir = Find-AntigravityPath
+if (-not $programDir) {
+    Write-Host "Antigravity installation was not found in standard directories." -ForegroundColor Yellow
+    $programDir = Read-Host "Please enter your Antigravity installation folder path (e.g. C:\Users\xxx\AppData\Local\Programs\antigravity)"
+}
+
+if (-not (Test-Path "$programDir\resources\app.asar")) {
+    Write-Error "Error: Antigravity installation not found at '$programDir'. Please make sure Antigravity is installed."
+}
+
 $resourcesDir = "$programDir\resources"
 $originalAsar = "$resourcesDir\app.asar"
 $backupAsar = "$resourcesDir\app.asar.bak"
 
-if (-not (Test-Path $originalAsar)) {
-    Write-Error "Error: Antigravity installation not found at '$programDir'. Please install the client first."
-}
+Write-Host "Found Antigravity at: $programDir" -ForegroundColor Green
 
-# 2. Terminate running Antigravity client
-Write-Host "Closing Antigravity client..." -ForegroundColor Yellow
+# 3. Terminate running Antigravity client
+Write-Host "Closing running Antigravity client..." -ForegroundColor Yellow
 $processes = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue
 if ($processes) {
     Stop-Process -Name "Antigravity" -Force
     Start-Sleep -Seconds 2
 }
 
-# 3. Create/Sync backup of original app.asar
-$patchedSuccessfully = $false
-$tempDir = Join-Path $env:TEMP "antigravity_web_patch"
-if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue }
-New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
-
+# 4. Create / Verify Backup
 $isCurrentPatched = $false
 if (Test-Path $originalAsar) {
     if (Select-String -Path $originalAsar -Pattern "Antigravity Chinese Localization Patch" -Quiet) {
@@ -45,109 +109,184 @@ if (Test-Path $originalAsar) {
 }
 
 if (-not $isCurrentPatched) {
-    Write-Host "Fresh/unpatched Antigravity client detected. Updating backup..." -ForegroundColor Green
+    Write-Host "Original unpatched Antigravity detected. Creating fresh backup..." -ForegroundColor Green
     Copy-Item $originalAsar $backupAsar -Force
 } else {
-    Write-Host "Patched Antigravity client detected. Keeping existing backup." -ForegroundColor Yellow
+    if (-not (Test-Path $backupAsar)) {
+        Write-Warning "Client is already patched and no original backup was found. Creating temporary backup..."
+        Copy-Item $originalAsar $backupAsar -Force
+    } else {
+        Write-Host "Backup file 'app.asar.bak' is ready." -ForegroundColor Green
+    }
 }
 
-# 4. Determine patch method
-$downloadedPreload = Join-Path $tempDir "preload.js"
-$timestamp = (Get-Date).Ticks
+# 5. Compile Native Zero-Dependency ASAR Patcher in memory
+$csharpPatcher = @"
+using System;
+using System.IO;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Collections.Generic;
 
-try {
-    Write-Host "Downloading latest Chinese localization script from GitHub..." -ForegroundColor Green
-    Invoke-RestMethod -Uri "$rawBaseUrl/dist/preload.js?t=$timestamp" -OutFile $downloadedPreload
-    
-    # Method A: Dynamic Local ASAR Injection (Requires Node.js)
-    if ($nodeCheck) {
-        try {
-            Write-Host "Node.js detected. Performing dynamic local injection..." -ForegroundColor Green
-            $asarTemp = Join-Path $tempDir "asar_extracted"
-            
-            Write-Host "Extracting your local app.asar..." -ForegroundColor Gray
-            & npx --yes asar extract $backupAsar $asarTemp
-            
-            Write-Host "Injecting localized preload.js..." -ForegroundColor Gray
-            $targetPreload = Join-Path $asarTemp "dist\preload.js"
-            if (Test-Path $targetPreload) {
-                # Load original preload.js
-                $originalPreloadContent = Get-Content -Path $targetPreload -Raw
-                
-                # Check if it was already patched, and if so, strip the old patch
-                $patchMarker = "// Antigravity Chinese Localization Patch"
-                $existingMarkerIndex = $originalPreloadContent.IndexOf($patchMarker)
-                if ($existingMarkerIndex -ge 0) {
-                    Write-Host "Found existing patch in preload.js. Removing it before updating..." -ForegroundColor Gray
-                    $originalPreloadContent = $originalPreloadContent.Substring(0, $existingMarkerIndex).Trim()
-                }
-                
-                # Load downloaded patch
-                $downloadedContent = Get-Content -Path $downloadedPreload -Raw
-                
-                # Extract patch IIFE
-                $markerIndex = $downloadedContent.IndexOf($patchMarker)
-                if ($markerIndex -ge 0) {
-                    $patchCode = $downloadedContent.Substring($markerIndex)
-                    
-                    # Append patch code
-                    $newPreloadContent = $originalPreloadContent + "`r`n`r`n" + $patchCode
-                    Set-Content -Path $targetPreload -Value $newPreloadContent -Force
-                    Write-Host "Successfully injected patch code into original preload.js!" -ForegroundColor Green
+public class NativeAsarEngine {
+    public class Entry {
+        public string Path;
+        public JsonObject Node;
+        public long OldOffset;
+        public long Size;
+        public bool IsUnpacked;
+        public byte[] OverriddenData;
+    }
+
+    public static bool InjectPreload(string inputAsar, string outputAsar, string patchCode) {
+        byte[] asarBytes = File.ReadAllBytes(inputAsar);
+        uint jsonSize = BitConverter.ToUInt32(asarBytes, 12);
+        string headerJson = Encoding.UTF8.GetString(asarBytes, 16, (int)jsonSize);
+        long dataStart = 16 + jsonSize;
+
+        var root = JsonNode.Parse(headerJson).AsObject();
+        var allEntries = new List<Entry>();
+        Collect(root["files"].AsObject(), "", allEntries);
+
+        Entry preloadEntry = allEntries.Find(e => e.Path.EndsWith("dist/preload.js") || e.Path.EndsWith("dist\\preload.js"));
+        if (preloadEntry == null) throw new Exception("dist/preload.js not found in app.asar");
+
+        byte[] oldPreloadBytes = new byte[preloadEntry.Size];
+        Array.Copy(asarBytes, dataStart + preloadEntry.OldOffset, oldPreloadBytes, 0, (int)preloadEntry.Size);
+        string oldPreload = Encoding.UTF8.GetString(oldPreloadBytes);
+
+        string patchMarker = "// Antigravity Chinese Localization Patch";
+        int markerIdx = oldPreload.IndexOf(patchMarker);
+        if (markerIdx >= 0) {
+            oldPreload = oldPreload.Substring(0, markerIdx).TrimEnd();
+        }
+
+        string newPreload = oldPreload + "\r\n\r\n" + patchCode;
+        byte[] newPreloadBytes = Encoding.UTF8.GetBytes(newPreload);
+        preloadEntry.OverriddenData = newPreloadBytes;
+        preloadEntry.Size = newPreloadBytes.Length;
+        preloadEntry.Node["size"] = preloadEntry.Size;
+
+        allEntries.Sort((a, b) => a.OldOffset.CompareTo(b.OldOffset));
+        long currentOffset = 0;
+        foreach (var entry in allEntries) {
+            if (entry.IsUnpacked) continue;
+            entry.Node["offset"] = currentOffset.ToString();
+            currentOffset += entry.Size;
+        }
+
+        byte[] newJsonBytes = Encoding.UTF8.GetBytes(root.ToJsonString());
+        uint newJsonSize = (uint)newJsonBytes.Length;
+
+        using (var fsOut = File.Create(outputAsar))
+        using (var bw = new BinaryWriter(fsOut)) {
+            bw.Write((uint)4);
+            bw.Write((uint)(newJsonSize + 8));
+            bw.Write((uint)(newJsonSize + 4));
+            bw.Write((uint)newJsonSize);
+            bw.Write(newJsonBytes);
+
+            foreach (var entry in allEntries) {
+                if (entry.IsUnpacked) continue;
+                if (entry.OverriddenData != null) {
+                    bw.Write(entry.OverriddenData);
                 } else {
-                    Write-Warning "Could not find patch marker in downloaded preload.js. Falling back to direct replacement."
-                    Copy-Item $downloadedPreload $targetPreload -Force
+                    bw.Write(asarBytes, (int)(dataStart + entry.OldOffset), (int)entry.Size);
                 }
-            } else {
-                Copy-Item $downloadedPreload $targetPreload -Force
             }
-            
-            Write-Host "Repacking app.asar..." -ForegroundColor Gray
-            & npx --yes asar pack $asarTemp $originalAsar --unpack-dir "**/chrome-devtools-mcp"
-            
-            Write-Host "Dynamic injection applied successfully!" -ForegroundColor Green
-            $patchedSuccessfully = $true
-        } catch {
-            Write-Warning "Dynamic local injection failed. Falling back to pre-compiled binary..."
+        }
+        return true;
+    }
+
+    private static void Collect(JsonObject filesNode, string currentPath, List<Entry> list) {
+        foreach (var kvp in filesNode) {
+            string name = kvp.Key;
+            var val = kvp.Value.AsObject();
+            string subPath = string.IsNullOrEmpty(currentPath) ? name : currentPath + "/" + name;
+            if (val.ContainsKey("files")) {
+                Collect(val["files"].AsObject(), subPath, list);
+            } else {
+                bool isUnpacked = val.ContainsKey("unpacked") && val["unpacked"].GetValue<bool>() == true;
+                long offset = val.ContainsKey("offset") ? long.Parse(val["offset"].ToString()) : 0;
+                long size = val.ContainsKey("size") ? long.Parse(val["size"].ToString()) : 0;
+                list.Add(new Entry { Path = subPath, Node = val, OldOffset = offset, Size = size, IsUnpacked = isUnpacked });
+            }
         }
     }
+}
+"@
+
+try {
+    Add-Type -TypeDefinition $csharpPatcher -Language CSharp
 } catch {
-    Write-Warning "Failed to download preload.js from GitHub raw. Falling back to direct binary replacement..."
+    # Type might already be loaded in current session
 }
 
-# Method B: Direct Binary Replacement (Download pre-compiled app.asar from GitHub Releases/Main)
-if (-not $patchedSuccessfully) {
-    try {
-        Write-Host "Downloading precompiled Chinese app.asar from GitHub..." -ForegroundColor Green
-        $downloadedAsar = Join-Path $tempDir "app.asar"
-        Invoke-RestMethod -Uri "$rawBaseUrl/app.asar?t=$timestamp" -OutFile $downloadedAsar
-        
-        Write-Host "Applying precompiled app.asar replacement..." -ForegroundColor Green
-        Copy-Item $downloadedAsar $originalAsar -Force
-        $patchedSuccessfully = $true
-    } catch {
-        Write-Error "Error: Failed to download pre-compiled 'app.asar' from GitHub. Please check your network connection."
-    }
+# 6. Download latest preload.js patch code
+$tempDir = Join-Path $env:TEMP "antigravity_web_patch_$timestamp"
+if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue }
+New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+
+$downloadedPreload = Join-Path $tempDir "preload.js"
+Write-Host "Downloading latest Chinese localization engine..." -ForegroundColor Green
+$downloadOk = Get-CdnFile "dist/preload.js" $downloadedPreload
+
+if (-not $downloadOk) {
+    Write-Error "Failed to download localization patch from CDN mirrors. Please check your internet connection."
 }
 
-# 5. Clean up temporary directory
-if (Test-Path $tempDir) {
-    Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
+# 7. Extract patch code
+$fullContent = Get-Content -Path $downloadedPreload -Raw -Encoding UTF8
+$patchMarker = "// Antigravity Chinese Localization Patch"
+$markerIndex = $fullContent.IndexOf($patchMarker)
+if ($markerIndex -ge 0) {
+    $patchCode = $fullContent.Substring($markerIndex)
+} else {
+    $patchCode = $fullContent
 }
 
-# 6. Restart Antigravity
-if ($patchedSuccessfully) {
-    Write-Host "Patch successfully applied!" -ForegroundColor Green
-    $exePath = Join-Path $programDir "Antigravity.exe"
-    if (Test-Path $exePath) {
-        Write-Host "Restarting Antigravity client..." -ForegroundColor Green
-        # Use cmd /c start to completely detach the process so it won't close when PowerShell is closed
-        Start-Process "cmd.exe" -ArgumentList "/c start `"`" `"$exePath`"" -WindowStyle Hidden
+# 8. Apply In-Place Native ASAR Patch
+Write-Host "Applying dynamic in-place ASAR injection (0.05s ultra-fast)..." -ForegroundColor Green
+$tempPatchedAsar = Join-Path $tempDir "app.asar.patched"
+
+$sourceAsar = if (Test-Path $backupAsar) { $backupAsar } else { $originalAsar }
+
+try {
+    [NativeAsarEngine]::InjectPreload($sourceAsar, $tempPatchedAsar, $patchCode)
+    Copy-Item $tempPatchedAsar $originalAsar -Force
+    Write-Host "Universal ASAR in-place patch successfully applied!" -ForegroundColor Green
+} catch {
+    Write-Warning "Native C# patcher encountered an issue: $_. Falling back to Node.js/npx if available..."
+    $npxCmd = Get-Command npx -ErrorAction SilentlyContinue
+    if ($npxCmd) {
+        $asarTemp = Join-Path $tempDir "asar_extracted"
+        & npx --yes asar extract $sourceAsar $asarTemp
+        $targetPreload = Join-Path $asarTemp "dist\preload.js"
+        $orig = Get-Content $targetPreload -Raw -Encoding UTF8
+        $mIdx = $orig.IndexOf($patchMarker)
+        if ($mIdx -ge 0) { $orig = $orig.Substring(0, $mIdx).Trim() }
+        Set-Content -Path $targetPreload -Value ($orig + "`r`n`r`n" + $patchCode) -Encoding UTF8
+        & npx --yes asar pack $asarTemp $originalAsar --unpack-dir "**/chrome-devtools-mcp"
+        Write-Host "Applied fallback injection successfully via npx asar!" -ForegroundColor Green
     } else {
-        Write-Warning "Antigravity.exe not found. Please start it manually."
+        Write-Error "Failed to patch ASAR file. Error: $_"
     }
 }
 
+# 9. Clean up temporary files
+Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
+
+# 10. Restart Antigravity
+$exePath = Join-Path $programDir "Antigravity.exe"
+if (Test-Path $exePath) {
+    Write-Host "Restarting Antigravity client..." -ForegroundColor Green
+    Start-Process "cmd.exe" -ArgumentList "/c start `"`" `"$exePath`"" -WindowStyle Hidden
+} else {
+    Write-Host "Patch complete! Please start Antigravity manually." -ForegroundColor Green
+}
+
+Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "     Patch successfully installed! Enjoy!                  " -ForegroundColor Cyan
 Write-Host "==========================================================" -ForegroundColor Cyan

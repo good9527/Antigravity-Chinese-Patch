@@ -1,5 +1,13 @@
-# Compilations, extractions, and temporary scripts
+# Node.js and build artifacts
+node_modules/
+dist_backup/
+*.asar
+*.asar.bak
+app.asar.unpacked/
 asar_temp/
+*.log
+
+# Temporary inspection and extraction files
 cache_strings.txt
 extract_cache_strings.js
 extract_strings.js
@@ -10,6 +18,8 @@ find_exact_ui_matches.js
 find_ui_strings.js
 main.js
 updater.js
-*.asar
-app.asar.unpacked/
 
+# OS specific files
+.DS_Store
+Thumbs.db
+Desktop.ini
