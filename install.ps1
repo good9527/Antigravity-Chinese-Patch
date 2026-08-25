@@ -279,10 +279,11 @@ public class UniversalAsarEngine {
 
     public static bool InjectPreload(string inputAsar, string outputAsar, string patchCode) {
         byte[] asarBytes = File.ReadAllBytes(inputAsar);
+        uint u2 = BitConverter.ToUInt32(asarBytes, 4);
         uint jsonSize = BitConverter.ToUInt32(asarBytes, 12);
-        string headerJson = Encoding.UTF8.GetString(asarBytes, 16, (int)jsonSize);
-        long dataStart = 16 + jsonSize;
+        long dataStart = 8 + u2;
 
+        string headerJson = Encoding.UTF8.GetString(asarBytes, 16, (int)jsonSize);
         var root = (Dictionary<string, object>)SimpleJson.Parse(headerJson);
         var allEntries = new List<FileEntry>();
         Collect((Dictionary<string, object>)root["files"], "", allEntries);
@@ -321,14 +322,19 @@ public class UniversalAsarEngine {
         string newJsonStr = SimpleJson.Serialize(root);
         byte[] newJsonBytes = Encoding.UTF8.GetBytes(newJsonStr);
         uint newJsonSize = (uint)newJsonBytes.Length;
+        uint padding = (4 - (newJsonSize % 4)) % 4;
+        uint headerPayload = newJsonSize + padding;
 
         using (var fsOut = File.Create(outputAsar))
         using (var bw = new BinaryWriter(fsOut)) {
             bw.Write((uint)4);
-            bw.Write((uint)(newJsonSize + 8));
-            bw.Write((uint)(newJsonSize + 4));
+            bw.Write((uint)(headerPayload + 8));
+            bw.Write((uint)(headerPayload + 4));
             bw.Write((uint)newJsonSize);
             bw.Write(newJsonBytes);
+            for (int i = 0; i < (int)padding; i++) {
+                bw.Write((byte)0);
+            }
 
             foreach (var entry in allEntries) {
                 if (entry.IsUnpacked) continue;
@@ -363,7 +369,7 @@ public class UniversalAsarEngine {
 try {
     Add-Type -TypeDefinition $csharpPatcher -Language CSharp
 } catch {
-    # Type might already be defined in current PowerShell process
+    # Type already defined
 }
 
 # 5. Download latest localization patch
