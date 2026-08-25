@@ -129,8 +129,6 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Open': '打开',
     'Edit': '编辑',
     'Customize': '定制',
-    
-    // Sidebar items
     'Account': '账户设置',
     'Permissions': '权限控制',
     'Appearance': '外观样式',
@@ -144,8 +142,6 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     '项目列表': '项目列表',
     '近期对话': '近期对话',
     '快捷键': '快捷键',
-    
-    // Top Menus (DOM fallback)
     'File': '文件',
     'View': '视图',
     'Window': '窗口',
@@ -154,8 +150,6 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Create Project': '创建项目',
     'Command Palette': '命令面板',
     'Check for Updates': '检查更新',
-    
-    // Feedback Page
     'Feedback Type': '反馈类型',
     'Bug Report': '缺陷报告',
     'Feature Request': '功能需求',
@@ -169,8 +163,6 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Any relevant information': '其他相关信息',
     'Describe the bug you encountered...': '请详细描述您遇到的缺陷(Bug)...',
     'Steps to Reproduce': '重现步骤说明',
-    
-    // Shortcuts Page
     'RECOMMENDED': '推荐快捷键',
     'NAVIGATION': '界面导航',
     'CONVERSATION': '对话交互',
@@ -183,15 +175,13 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Select Previous Conversation': '选择上一个对话',
     'Select Next Conversation': '选择下一个对话',
     'Open Settings': '打开设置中心',
-    
-    // Recent Conversations & Permissions Page
     'Agent Settings': '智能体设置',
     'Security Preset': '安全预设等级',
     'Turbo Mode': '极速模式',
     'Agent Behavior': '智能体动作行为',
     'Artifact Review Policy': '产物审核机制',
-    'Always Proceed': '始终继续 (不提示)',
-    'Always Ask': '每次均询问',
+    'Always Proceed': '始终继续',
+    'Always Ask': '每次询问',
     'Local Permissions': '本地工作区授权',
     'global settings': '全局设置',
     'File Access Rules': '文件系统读写规则',
@@ -199,41 +189,29 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Terminal Commands': '终端指令执行规则',
     'Commands Outside Sandbox': '沙箱外执行命令',
     'MCP Tools': 'MCP 外部工具扩展',
-    
-    // Project Settings Page
     'Folders': '项目文件夹',
     '+ Add Folder': '+ 添加文件夹',
-    
-    // App Settings Page
     'App Settings': '客户端应用设置',
     'Prevent Sleep': '阻止系统自动休眠',
     'Keep In Menu Bar': '最小化至菜单栏(常驻后台)',
     'Notifications': '系统通知提醒',
     'Notification Settings': '应用通知设置',
     'Open System Preferences': '打开系统偏好设置',
-    
-    // Browser Settings Page
     'Browser Settings': '浏览器自动化设置',
     'Browser Javascript Execution Policy': '浏览器 JavaScript 脚本执行策略',
     'Actuation Permissions': '自动化执行授权',
     'Browser Actuation Rules': '浏览器网页操作规则',
-    
-    // Customizations Page
     'Token Usage': 'Token 消耗额度分析',
-    'Installed MCP Servers': '已部署的 MCP 服务列表',
+    'Installed MCP Servers': '已部署的 MCP 服务',
     'Add MCP +': '+ 部署 MCP 服务',
     'Refresh': '刷新列表',
     'No MCP Servers': '暂无 MCP 服务',
     'Build With Google Plugins': '基于 Google 官方插件构建',
-    
-    // Models Page
     'Model Credits': 'AI 模型点数余额',
     'Enable AI Credit Overages': '允许超出额度后扣除点数',
     'See Activity': '查看消费明细',
     'Get More AI Credits': '充值/获取更多点数',
     'Model Quota': '免费模型使用配额',
-    
-    // Appearance Page
     'Chat Settings': '聊天窗口偏好',
     'Verbose agent chat': '展示智能体完整思考步骤',
     'Preset': '预设主题色',
@@ -242,34 +220,24 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Background': '背景底色',
     'Foreground': '前景文字字色',
     'Accent': '全局强调色',
-    'Dark Theme': '深色模式配色',
-    
-    // Permissions Summary Page
+    'Dark Theme': '深色主题',
     'Project-Specific Settings': '项目特定权限配置',
     'Go To Projects': '前往项目管理中心',
     'File Permissions': '文件系统访问权限',
     'Network Permissions': '网络请求权限',
     'Terminal & Tooling Permissions': '系统终端与调试工具授权',
-    
-    // Account Page
     'Marketing Emails': '接收产品推广与技术周报',
     'Upgrade': '订阅升级',
     'Sign Out': '退出当前账户',
     'Terms of Service': '服务条款说明',
     'Email': '邮箱账号',
-    
-    // Context @ menu
     'Add Context': '添加上下文',
     'Media': '媒体文件 (图片/视频)',
     'Mentions': '提及项 (@ 符号)',
     'Actions': '动作指令 (/ 符号)',
-    
-    // Toggles and Options
     'Minimize': '最小化',
     'Maximize': '最大化',
     'Toggle Developer Tools': '切换开发者工具',
-    
-    // Safety Presets Specific
     'Default': '默认',
     'Full Machine': '整机授权',
     'Custom': '自定义',
@@ -279,8 +247,6 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'All terminal commands require review. The agent can read or write to any file in the machine': '所有终端命令都需要审核。智能体可以读取或写入系统中的任何文件',
     'Disables all safety barriers for maximal iteration velocity': '禁用所有安全屏障以换取最大迭代速度',
     'Permanently delete this project and all of its conversations': '永久删除此项目及其所有的对话记录',
-    
-    // Fragment translations (for HTML inline links)
     'Inherits from': '继承自',
     'Local permissions have higher priority': '本地权限具有更高优先级',
     'Learn more': '了解更多',
@@ -288,27 +254,18 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Learn more about ': '了解更多关于 ',
     'Learn more about': '了解更多关于',
     'Turbo mode': '极速模式',
-    'Turbo Mode': '极速模式',
-    
-    // Theme options
     'System': '跟随系统',
     'Light': '浅色',
     'Dark': '深色',
-
-    // Feedback specifics
     'Attach a screenshot (optional)': '添加截图 (可选)',
     'Attach Antigravity server logs': '附带 Antigravity 服务端日志',
     'Submit': '提交',
     'Please list the steps to reproduce the issue': '请列出重现此问题的步骤',
     'Please describe the issue in detail. The more actionable your feedback, the quicker our team can address your request. Some helpful information includes': '请详细描述您遇到的问题。您的反馈越具体，我们的团队就能越快地处理您的请求。一些有帮助的信息包括',
-    
-    // Additional UI elements
     'Search conversations...': '搜索对话...',
     'Filter': '筛选',
     'Enable Telemetry': '允许收集匿名使用数据',
     'Manually customize individual settings.': '手动配置具体的权限规则。',
-    
-    // Agent status indicators
     'Working..': '正在处理..',
     'Working...': '正在处理...',
     'Working': '正在处理',
@@ -318,18 +275,12 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Analyzing..': '正在分析..',
     'Analyzing...': '正在分析...',
     'Analyzing': '正在分析',
-    
-    // Agent Action Logs & Buttons
     'Review': '审核',
     'Schedule timer: Timer has expired': '调度定时器：定时器已过期',
     'Repack app.asar finished': '打包 app.asar 已完成',
-
-    // Sidebar exact matches
     'General': '通用设置',
     'Models': '模型列表',
     'Shortcuts': '快捷键',
-
-    // Safety Presets & Descriptions
     'Agent settings and permissions for conversations outside of projects': '项目外部对话的智能体设置 and 权限',
     'Choose a predefined security preset for the agent. This controls terminal auto-execution policy, and file access policy': '为智能体选择预设的安全级别。这控制了终端命令自动执行策略和文件访问策略',
     'Learn more about Turbo mode': '了解关于 Turbo 极速模式的详情',
@@ -374,7 +325,6 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Zoom In': '放大',
     'Zoom Out': '缩小',
     'Reset Zoom': '重置缩放',
-    'Go To Projects': '前往项目管理中心',
     'By using this app, you agree to its': '继续使用本客户端应用程序，即代表您同意其',
     'Your Plan: Google AI Pro': '订阅计划：Google AI 专业版',
     'Your Plan: Google AI Ultra': '订阅计划：Google AI 旗舰版',
@@ -384,7 +334,6 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'to be installed. The browser subagent can be invoked by typing /browser in the conversation input box.': '。您可以在输入框中输入 /browser 来召唤浏览器助手。',
     'View your available model quota and AI credits. Model quota refreshes periodically based on your plan. Enable AI Credit Overages to continue using models when your quota is exhausted.': '查看您可用的模型配额和 AI 点数。模型配额会根据您的订阅计划定期重置。开启允许超出额度后扣除点数，可在配额耗尽后继续使用模型。',
     'Light Theme': '浅色主题',
-    'Dark Theme': '深色主题',
     'Clear All': '清除全部',
     'Clear History': '清除历史记录',
     'Search': '搜索',
@@ -401,10 +350,111 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Uploads': '已上传文件',
     'Background Tasks': '后台任务',
     'MCP Error': 'MCP 异常',
-    'Review': '审核',
     'Accept': '接受',
     'Reject': '拒绝',
-    'Recent Conversations': '近期对话'
+    'Recent Conversations': '近期对话',
+    'Accept Step': '接受步骤',
+    'Reject Step': '拒绝步骤',
+    'Action Required': '需要操作',
+    'Add Custom Model': '添加自定义模型',
+    'Add MCP Servers': '添加 MCP 服务',
+    'Add Workspace': '添加工作区',
+    'Add context': '添加上下文',
+    'Add to Chat': '添加到对话',
+    'Add to Chat/Quote': '添加到对话/引用',
+    'All conversations': '全部对话',
+    'All models': '全部模型',
+    'Allow': '允许',
+    'Deny': '拒绝',
+    'Always Allow': '始终允许',
+    'Always Deny': '始终拒绝',
+    'Ask before running': '运行前询问',
+    'Apply Changes': '应用更改',
+    'Discard Changes': '放弃更改',
+    'Revert Changes': '撤销更改',
+    'Review Changes': '审核更改',
+    'Review my design': '审核我的设计',
+    'Review this code': '审核此代码',
+    'Agent finished': '智能体已完成',
+    'Agent execution failed': '智能体执行失败',
+    'Agent execution failed.': '智能体执行失败。',
+    'Agent response': '智能体回复',
+    'Agent Security Settings': '智能体安全设置',
+    'Agent Team': '智能体协作团队',
+    'Agent always asks for review.': '智能体将始终请求审核。',
+    'Agent cannot modify files outside of the workspace in strict mode.': '在严格模式下，智能体无法修改工作区外的文件。',
+    'Agent will always ask to review in strict mode.': '在严格模式下，智能体将始终请求审核。',
+    'Agents have full access to your machine and external resources.': '智能体对您的计算机和外部资源拥有完全访问权限。',
+    'A shell setup script run before every command the agent executes.': '在智能体执行每条命令前运行的 Shell 初始化脚本。',
+    'Absolute path to the Chrome/Chromium executable': 'Chrome/Chromium 可执行文件的绝对路径',
+    'Agent Auto-Fix Lints': '智能体自动修复代码 Lint 错误',
+    'Agent Non-Workspace File Access': '智能体工作区外文件访问权限',
+    'Agent Script Command Configuration': '智能体脚本与命令配置',
+    'MCP Servers': 'MCP 服务',
+    'Active Conversations': '活跃对话',
+    'Archived Conversations': '归档对话',
+    'Clear Conversations': '清除对话记录',
+    'Delete Conversation': '删除对话',
+    'Delete All Conversations': '删除所有对话',
+    'Export Conversation': '导出对话',
+    'Import Conversation': '导入对话',
+    'Pin Conversation': '置顶对话',
+    'Unpin Conversation': '取消置顶',
+    'Collapse All': '全部折叠',
+    'Expand All': '全部展开',
+    'Terminal Command Execution Policy': '终端命令执行策略',
+    'Terminal Execution Policy': '终端执行策略',
+    'File Access Policy': '文件访问策略',
+    'Network Access Policy': '网络访问策略',
+    'Allow commands outside sandbox': '允许在沙箱外部执行命令',
+    'Requires confirmation for dangerous operations': '危险操作需要用户二次确认',
+    'Read-only mode': '只读模式',
+    'Read and Write': '读写模式',
+    'Full Access': '完全访问',
+    'Restricted Access': '受限访问',
+    'Blocked by Policy': '已被安全策略拦截',
+    'Selected Model': '当前选中模型',
+    'Switch Model': '切换模型',
+    'Select a model': '选择一个模型',
+    'Model Parameters': '模型参数配置',
+    'Temperature': '随机性 (Temperature)',
+    'Top P': '采样阈值 (Top P)',
+    'Max Tokens': '最大 Token 数量',
+    'Quota Exceeded': '配额已用尽',
+    'Credits Balance': '账户点数余额',
+    'Daily Quota': '每日免费配额',
+    'Monthly Quota': '每月配额',
+    'Unlimited': '无限制',
+    'Rate Limit Reached': '已达到速率限制',
+    'Please try again later': '请稍后再试',
+    'Theme Mode': '配色主题模式',
+    'Follow System Theme': '跟随系统主题',
+    'High Contrast Theme': '高对比度主题',
+    'Font Family': '界面字体',
+    'Font Size': '字号大小',
+    'Line Height': '行高',
+    'Zoom Factor': '缩放比例',
+    'Custom CSS': '自定义样式表 (CSS)',
+    'Browser Automation': '浏览器自动化助手',
+    'Chrome Path': 'Chrome 浏览器路径',
+    'Headless Mode': '无头静默模式 (Headless)',
+    'Allow JavaScript Execution': '允许执行网页 JavaScript',
+    'Allow Screenshot Capture': '允许网页截图与录制',
+    'Allow Form Submission': '允许自动填写并提交表单',
+    'Allow Navigation': '允许跳转外部链接',
+    'Are you sure you want to proceed?': '您确定要继续操作吗？',
+    'This action cannot be undone.': '此操作无法撤销，请谨慎操作。',
+    'Confirmation Required': '需要确认',
+    'Changes Saved': '更改已成功保存',
+    'Settings updated successfully': '设置已成功更新',
+    'Failed to save settings': '保存设置失败',
+    'Connection Error': '网络连接错误',
+    'Server Disconnected': '与服务端的连接已断开',
+    'Reconnecting...': '正在重新连接...',
+    'Connected': '已连接',
+    'Disconnected': '已断开',
+    'Syncing...': '正在同步...',
+    'Sync Complete': '同步已完成'
   };
 
   const substringReplacements = [

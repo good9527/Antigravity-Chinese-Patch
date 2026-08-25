@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "     Antigravity Chinese Patch Universal Web Installer    " -ForegroundColor Cyan
-Write-Host "     (Zero-Dependency In-Place Native Patch Engine)       " -ForegroundColor DarkCyan
+Write-Host "     (Zero-Dependency Safe In-Place Hot Injection)        " -ForegroundColor DarkCyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -42,25 +42,21 @@ Function Get-CdnFile($relativePath, $destinationPath) {
 
 # 2. Smart Path Resolver (Active Process -> Registry -> Default Folders)
 Function Find-AntigravityPath {
-    # 2.1 Check active process
     $proc = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($proc -and $proc.Path) {
         $dir = Split-Path -Parent $proc.Path
         if (Test-Path (Join-Path $dir "resources\app.asar")) { return $dir }
     }
 
-    # 2.2 Check default user directory
     $userPath = "$env:LOCALAPPDATA\Programs\antigravity"
     if (Test-Path (Join-Path $userPath "resources\app.asar")) { return $userPath }
 
-    # 2.3 Check Program Files
     $pfPath = "$env:ProgramFiles\Antigravity"
     if (Test-Path (Join-Path $pfPath "resources\app.asar")) { return $pfPath }
     
     $pfx86Path = "${env:ProgramFiles(x86)}\Antigravity"
     if (Test-Path (Join-Path $pfx86Path "resources\app.asar")) { return $pfx86Path }
 
-    # 2.4 Check Windows Registry Uninstall entries
     $regRoots = @(
         "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
         "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
@@ -115,7 +111,7 @@ if (-not $isCurrentPatched) {
     }
 }
 
-# 4. Compile Universal Standard C# ASAR Engine in memory (Compatible with Windows PowerShell 5.1 & PowerShell 7+)
+# 4. Compile Universal Standard C# ASAR Engine in memory
 $csharpPatcher = @"
 using System;
 using System.IO;
@@ -395,7 +391,7 @@ if ($markerIndex -ge 0) {
     $patchCode = $fullContent
 }
 
-# 7. Hot In-Place ASAR Injection
+# 7. Safe In-Place ASAR Injection (100% safe, never terminates Antigravity)
 Write-Host "Applying dynamic native in-place ASAR injection (0.05s)..." -ForegroundColor Green
 $tempPatchedAsar = Join-Path $tempDir "app.asar.patched"
 $sourceAsar = if (Test-Path $backupAsar) { $backupAsar } else { $originalAsar }
@@ -411,22 +407,10 @@ try {
 # 8. Clean up
 Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
 
-# 9. Auto restart if running to reload Electron ASAR cache instantly
-$processes = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue
-if ($processes) {
-    Write-Host "Restarting Antigravity client to reload interface..." -ForegroundColor Green
-    Stop-Process -Name "Antigravity" -Force
-    Start-Sleep -Seconds 1
-    $exePath = Join-Path $programDir "Antigravity.exe"
-    if (Test-Path $exePath) {
-        Start-Process "cmd.exe" -ArgumentList "/c start `"`" `"$exePath`"" -WindowStyle Hidden
-    }
-}
-
-# 10. Notify user
+# 9. Notify user
 Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "     🎉 汉化补丁安装成功！(Patch Successfully Installed) " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "  ✨ 客户端已完成汉化！享受 Antigravity 中文体验吧！" -ForegroundColor Green
+Write-Host "  ✨ 补丁已写入完成！你可以随时自行重启 Antigravity 客户端生效。" -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Cyan
