@@ -1,3 +1,5 @@
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
 # install.ps1
 # One-click Universal Online Web Installer for Antigravity-Chinese-Patch
 # PowerShell: iwr -useb https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1 | iex
@@ -6,6 +8,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "     Antigravity Chinese Patch Universal Web Installer    " -ForegroundColor Cyan
+Write-Host "     (Zero-Dependency In-Place Hot Injection)             " -ForegroundColor DarkCyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -90,17 +93,9 @@ $resourcesDir = "$programDir\resources"
 $originalAsar = "$resourcesDir\app.asar"
 $backupAsar = "$resourcesDir\app.asar.bak"
 
-Write-Host "Found Antigravity at: $programDir" -ForegroundColor Green
+Write-Host "Target Antigravity directory: $programDir" -ForegroundColor Green
 
-# 3. Terminate running Antigravity client
-Write-Host "Closing running Antigravity client..." -ForegroundColor Yellow
-$processes = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue
-if ($processes) {
-    Stop-Process -Name "Antigravity" -Force
-    Start-Sleep -Seconds 2
-}
-
-# 4. Create / Verify Backup
+# 3. Check / Create Backup
 $isCurrentPatched = $false
 if (Test-Path $originalAsar) {
     if (Select-String -Path $originalAsar -Pattern "Antigravity Chinese Localization Patch" -Quiet) {
@@ -109,30 +104,173 @@ if (Test-Path $originalAsar) {
 }
 
 if (-not $isCurrentPatched) {
-    Write-Host "Original unpatched Antigravity detected. Creating fresh backup..." -ForegroundColor Green
+    Write-Host "Original unpatched client detected. Creating backup..." -ForegroundColor Green
     Copy-Item $originalAsar $backupAsar -Force
 } else {
     if (-not (Test-Path $backupAsar)) {
-        Write-Warning "Client is already patched and no original backup was found. Creating temporary backup..."
+        Write-Host "Creating backup of current client..." -ForegroundColor Gray
         Copy-Item $originalAsar $backupAsar -Force
     } else {
-        Write-Host "Backup file 'app.asar.bak' is ready." -ForegroundColor Green
+        Write-Host "Backup 'app.asar.bak' is verified." -ForegroundColor Green
     }
 }
 
-# 5. Compile Native Zero-Dependency ASAR Patcher in memory
+# 4. Compile Universal Standard C# ASAR Engine in memory (Compatible with Windows PowerShell 5.1 & PowerShell 7+)
 $csharpPatcher = @"
 using System;
 using System.IO;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Collections.Generic;
 
-public class NativeAsarEngine {
-    public class Entry {
+public class UniversalAsarEngine {
+    public class SimpleJson {
+        public static object Parse(string json) {
+            int index = 0;
+            return ParseValue(json, ref index);
+        }
+
+        private static void SkipWhite(string s, ref int idx) {
+            while (idx < s.Length && char.IsWhiteSpace(s[idx])) idx++;
+        }
+
+        private static object ParseValue(string s, ref int idx) {
+            SkipWhite(s, ref idx);
+            if (idx >= s.Length) return null;
+            char c = s[idx];
+            if (c == '{') return ParseObject(s, ref idx);
+            if (c == '[') return ParseArray(s, ref idx);
+            if (c == '"') return ParseString(s, ref idx);
+            if (char.IsDigit(c) || c == '-') return ParseNumber(s, ref idx);
+            if (s.Substring(idx).StartsWith("true")) { idx += 4; return true; }
+            if (s.Substring(idx).StartsWith("false")) { idx += 5; return false; }
+            if (s.Substring(idx).StartsWith("null")) { idx += 4; return null; }
+            throw new Exception("Unexpected char at " + idx + ": " + c);
+        }
+
+        private static Dictionary<string, object> ParseObject(string s, ref int idx) {
+            var dict = new Dictionary<string, object>();
+            idx++;
+            while (true) {
+                SkipWhite(s, ref idx);
+                if (idx >= s.Length) break;
+                if (s[idx] == '}') { idx++; break; }
+                string key = ParseString(s, ref idx);
+                SkipWhite(s, ref idx);
+                if (s[idx] == ':') idx++;
+                object val = ParseValue(s, ref idx);
+                dict[key] = val;
+                SkipWhite(s, ref idx);
+                if (s[idx] == ',') idx++;
+                else if (s[idx] == '}') { idx++; break; }
+            }
+            return dict;
+        }
+
+        private static List<object> ParseArray(string s, ref int idx) {
+            var list = new List<object>();
+            idx++;
+            while (true) {
+                SkipWhite(s, ref idx);
+                if (idx >= s.Length) break;
+                if (s[idx] == ']') { idx++; break; }
+                object val = ParseValue(s, ref idx);
+                list.Add(val);
+                SkipWhite(s, ref idx);
+                if (s[idx] == ',') idx++;
+                else if (s[idx] == ']') { idx++; break; }
+            }
+            return list;
+        }
+
+        private static string ParseString(string s, ref int idx) {
+            SkipWhite(s, ref idx);
+            if (s[idx] != '"') throw new Exception("Expected string quotes at " + idx);
+            idx++;
+            var sb = new StringBuilder();
+            while (idx < s.Length) {
+                char c = s[idx++];
+                if (c == '"') break;
+                if (c == '\\' && idx < s.Length) {
+                    char esc = s[idx++];
+                    if (esc == '"') sb.Append('"');
+                    else if (esc == '\\') sb.Append('\\');
+                    else if (esc == '/') sb.Append('/');
+                    else if (esc == 'b') sb.Append('\b');
+                    else if (esc == 'f') sb.Append('\f');
+                    else if (esc == 'n') sb.Append('\n');
+                    else if (esc == 'r') sb.Append('\r');
+                    else if (esc == 't') sb.Append('\t');
+                    else if (esc == 'u' && idx + 4 <= s.Length) {
+                        string hex = s.Substring(idx, 4);
+                        sb.Append((char)Convert.ToInt32(hex, 16));
+                        idx += 4;
+                    }
+                } else {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
+        }
+
+        private static double ParseNumber(string s, ref int idx) {
+            int start = idx;
+            if (s[idx] == '-') idx++;
+            while (idx < s.Length && (char.IsDigit(s[idx]) || s[idx] == '.' || s[idx] == 'e' || s[idx] == 'E' || s[idx] == '+' || s[idx] == '-')) idx++;
+            return double.Parse(s.Substring(start, idx - start), System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        public static string Serialize(object obj) {
+            var sb = new StringBuilder();
+            SerializeValue(obj, sb);
+            return sb.ToString();
+        }
+
+        private static void SerializeValue(object obj, StringBuilder sb) {
+            if (obj == null) sb.Append("null");
+            else if (obj is string) {
+                sb.Append('"');
+                foreach (char c in (string)obj) {
+                    if (c == '"') sb.Append("\\\"");
+                    else if (c == '\\') sb.Append("\\\\");
+                    else if (c == '\b') sb.Append("\\b");
+                    else if (c == '\f') sb.Append("\\f");
+                    else if (c == '\n') sb.Append("\\n");
+                    else if (c == '\r') sb.Append("\\r");
+                    else if (c == '\t') sb.Append("\\t");
+                    else sb.Append(c);
+                }
+                sb.Append('"');
+            } else if (obj is bool) {
+                sb.Append((bool)obj ? "true" : "false");
+            } else if (obj is double || obj is float || obj is int || obj is long) {
+                sb.Append(Convert.ToString(obj, System.Globalization.CultureInfo.InvariantCulture));
+            } else if (obj is Dictionary<string, object>) {
+                sb.Append('{');
+                bool first = true;
+                foreach (var kvp in (Dictionary<string, object>)obj) {
+                    if (!first) sb.Append(',');
+                    first = false;
+                    SerializeValue(kvp.Key, sb);
+                    sb.Append(':');
+                    SerializeValue(kvp.Value, sb);
+                }
+                sb.Append('}');
+            } else if (obj is List<object>) {
+                sb.Append('[');
+                bool first = true;
+                foreach (var item in (List<object>)obj) {
+                    if (!first) sb.Append(',');
+                    first = false;
+                    SerializeValue(item, sb);
+                }
+                sb.Append(']');
+            }
+        }
+    }
+
+    public class FileEntry {
         public string Path;
-        public JsonObject Node;
+        public Dictionary<string, object> Node;
         public long OldOffset;
         public long Size;
         public bool IsUnpacked;
@@ -145,11 +283,11 @@ public class NativeAsarEngine {
         string headerJson = Encoding.UTF8.GetString(asarBytes, 16, (int)jsonSize);
         long dataStart = 16 + jsonSize;
 
-        var root = JsonNode.Parse(headerJson).AsObject();
-        var allEntries = new List<Entry>();
-        Collect(root["files"].AsObject(), "", allEntries);
+        var root = (Dictionary<string, object>)SimpleJson.Parse(headerJson);
+        var allEntries = new List<FileEntry>();
+        Collect((Dictionary<string, object>)root["files"], "", allEntries);
 
-        Entry preloadEntry = allEntries.Find(e => e.Path.EndsWith("dist/preload.js") || e.Path.EndsWith("dist\\preload.js"));
+        FileEntry preloadEntry = allEntries.Find(e => e.Path.EndsWith("dist/preload.js") || e.Path.EndsWith("dist\\preload.js"));
         if (preloadEntry == null) throw new Exception("dist/preload.js not found in app.asar");
 
         byte[] oldPreloadBytes = new byte[preloadEntry.Size];
@@ -166,7 +304,11 @@ public class NativeAsarEngine {
         byte[] newPreloadBytes = Encoding.UTF8.GetBytes(newPreload);
         preloadEntry.OverriddenData = newPreloadBytes;
         preloadEntry.Size = newPreloadBytes.Length;
-        preloadEntry.Node["size"] = preloadEntry.Size;
+        preloadEntry.Node["size"] = (double)preloadEntry.Size;
+        
+        if (preloadEntry.Node.ContainsKey("integrity")) {
+            preloadEntry.Node.Remove("integrity");
+        }
 
         allEntries.Sort((a, b) => a.OldOffset.CompareTo(b.OldOffset));
         long currentOffset = 0;
@@ -176,7 +318,8 @@ public class NativeAsarEngine {
             currentOffset += entry.Size;
         }
 
-        byte[] newJsonBytes = Encoding.UTF8.GetBytes(root.ToJsonString());
+        string newJsonStr = SimpleJson.Serialize(root);
+        byte[] newJsonBytes = Encoding.UTF8.GetBytes(newJsonStr);
         uint newJsonSize = (uint)newJsonBytes.Length;
 
         using (var fsOut = File.Create(outputAsar))
@@ -199,18 +342,18 @@ public class NativeAsarEngine {
         return true;
     }
 
-    private static void Collect(JsonObject filesNode, string currentPath, List<Entry> list) {
+    private static void Collect(Dictionary<string, object> filesNode, string currentPath, List<FileEntry> list) {
         foreach (var kvp in filesNode) {
             string name = kvp.Key;
-            var val = kvp.Value.AsObject();
+            var val = (Dictionary<string, object>)kvp.Value;
             string subPath = string.IsNullOrEmpty(currentPath) ? name : currentPath + "/" + name;
             if (val.ContainsKey("files")) {
-                Collect(val["files"].AsObject(), subPath, list);
+                Collect((Dictionary<string, object>)val["files"], subPath, list);
             } else {
-                bool isUnpacked = val.ContainsKey("unpacked") && val["unpacked"].GetValue<bool>() == true;
+                bool isUnpacked = val.ContainsKey("unpacked") && val["unpacked"] is bool && (bool)val["unpacked"] == true;
                 long offset = val.ContainsKey("offset") ? long.Parse(val["offset"].ToString()) : 0;
-                long size = val.ContainsKey("size") ? long.Parse(val["size"].ToString()) : 0;
-                list.Add(new Entry { Path = subPath, Node = val, OldOffset = offset, Size = size, IsUnpacked = isUnpacked });
+                long size = val.ContainsKey("size") ? (long)Convert.ToDouble(val["size"]) : 0;
+                list.Add(new FileEntry { Path = subPath, Node = val, OldOffset = offset, Size = size, IsUnpacked = isUnpacked });
             }
         }
     }
@@ -220,10 +363,10 @@ public class NativeAsarEngine {
 try {
     Add-Type -TypeDefinition $csharpPatcher -Language CSharp
 } catch {
-    # Type might already be loaded in current session
+    # Type might already be defined in current PowerShell process
 }
 
-# 6. Download latest preload.js patch code
+# 5. Download latest localization patch
 $tempDir = Join-Path $env:TEMP "antigravity_web_patch_$timestamp"
 if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue }
 New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
@@ -236,7 +379,7 @@ if (-not $downloadOk) {
     Write-Error "Failed to download localization patch from CDN mirrors. Please check your internet connection."
 }
 
-# 7. Extract patch code
+# 6. Extract patch code
 $fullContent = Get-Content -Path $downloadedPreload -Raw -Encoding UTF8
 $patchMarker = "// Antigravity Chinese Localization Patch"
 $markerIndex = $fullContent.IndexOf($patchMarker)
@@ -246,47 +389,29 @@ if ($markerIndex -ge 0) {
     $patchCode = $fullContent
 }
 
-# 8. Apply In-Place Native ASAR Patch
-Write-Host "Applying dynamic in-place ASAR injection (0.05s ultra-fast)..." -ForegroundColor Green
+# 7. Hot In-Place ASAR Injection (Works seamlessly even while Antigravity is running!)
+Write-Host "Applying dynamic hot in-place ASAR injection (0.05s)..." -ForegroundColor Green
 $tempPatchedAsar = Join-Path $tempDir "app.asar.patched"
-
 $sourceAsar = if (Test-Path $backupAsar) { $backupAsar } else { $originalAsar }
 
 try {
-    [NativeAsarEngine]::InjectPreload($sourceAsar, $tempPatchedAsar, $patchCode)
+    [UniversalAsarEngine]::InjectPreload($sourceAsar, $tempPatchedAsar, $patchCode) | Out-Null
     Copy-Item $tempPatchedAsar $originalAsar -Force
     Write-Host "Universal ASAR in-place patch successfully applied!" -ForegroundColor Green
 } catch {
-    Write-Warning "Native C# patcher encountered an issue: $_. Falling back to Node.js/npx if available..."
-    $npxCmd = Get-Command npx -ErrorAction SilentlyContinue
-    if ($npxCmd) {
-        $asarTemp = Join-Path $tempDir "asar_extracted"
-        & npx --yes asar extract $sourceAsar $asarTemp
-        $targetPreload = Join-Path $asarTemp "dist\preload.js"
-        $orig = Get-Content $targetPreload -Raw -Encoding UTF8
-        $mIdx = $orig.IndexOf($patchMarker)
-        if ($mIdx -ge 0) { $orig = $orig.Substring(0, $mIdx).Trim() }
-        Set-Content -Path $targetPreload -Value ($orig + "`r`n`r`n" + $patchCode) -Encoding UTF8
-        & npx --yes asar pack $asarTemp $originalAsar --unpack-dir "**/chrome-devtools-mcp"
-        Write-Host "Applied fallback injection successfully via npx asar!" -ForegroundColor Green
-    } else {
-        Write-Error "Failed to patch ASAR file. Error: $_"
-    }
+    Write-Error "Failed to patch ASAR file. Error: $_"
 }
 
-# 9. Clean up temporary files
+# 8. Clean up
 Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
 
-# 10. Restart Antigravity
-$exePath = Join-Path $programDir "Antigravity.exe"
-if (Test-Path $exePath) {
-    Write-Host "Restarting Antigravity client..." -ForegroundColor Green
-    Start-Process "cmd.exe" -ArgumentList "/c start `"`" `"$exePath`"" -WindowStyle Hidden
-} else {
-    Write-Host "Patch complete! Please start Antigravity manually." -ForegroundColor Green
-}
-
+# 9. Notify user
 Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "     Patch successfully installed! Enjoy!                  " -ForegroundColor Cyan
+Write-Host "     🎉 汉化补丁安装成功！(Patch Successfully Installed) " -ForegroundColor Green
+Write-Host "==========================================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  ✨ 无需重启软件！如果 Antigravity 正在运行中：" -ForegroundColor Yellow
+Write-Host "     在软件窗口中按 [Ctrl + R] (重新加载) 或新开对话窗口，" -ForegroundColor White
+Write-Host "     即可立即看到中文汉化界面！" -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Cyan

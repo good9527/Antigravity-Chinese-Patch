@@ -1,4 +1,4 @@
-﻿@echo off
+﻿﻿@echo off
 chcp 65001 >nul
 title Antigravity 中文汉化管理面板 (Elite Toolkit)
 echo ============================================================
