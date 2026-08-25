@@ -1,0 +1,37 @@
+name: Release Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Release Zip Package
+        run: |
+          mkdir -p package/dist
+          cp dist/preload.js package/dist/
+          cp dist/dictionary.json package/dist/
+          cp patch_antigravity.ps1 package/
+          cp "安装汉化补丁.bat" package/
+          cp README.md package/
+          cd package
+          zip -r ../Antigravity-Chinese-Patch-Elite.zip ./*
+          cd ..
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Antigravity-Chinese-Patch-Elite
+          path: Antigravity-Chinese-Patch-Elite.zip

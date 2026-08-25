@@ -394,7 +394,17 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     'Regenerate': '重新生成',
     'Retry': '重试',
     'Advanced Settings': '高级设置',
-    'Updates': '更新'
+    'Updates': '更新',
+    'Subagents': '子智能体',
+    'Files Changed': '已修改文件',
+    'Artifacts': '产物',
+    'Uploads': '已上传文件',
+    'Background Tasks': '后台任务',
+    'MCP Error': 'MCP 异常',
+    'Review': '审核',
+    'Accept': '接受',
+    'Reject': '拒绝',
+    'Recent Conversations': '近期对话'
   };
 
   const substringReplacements = [
@@ -599,7 +609,51 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
       }
     }
 
-    // 17. Substring translation for complex descriptions
+    // 17. Pattern: Right auxiliary pane items: Subagents N, Files Changed N, Artifacts N, Uploads N, Background Tasks N
+    const paneMatch = trimmed.match(/^(Subagents|Files Changed|Artifacts|Uploads|Background Tasks)\s+(\d+)$/i);
+    if (paneMatch) {
+      const typeMap = {
+        'subagents': '子智能体',
+        'files changed': '已修改文件',
+        'artifacts': '产物',
+        'uploads': '已上传文件',
+        'background tasks': '后台任务'
+      };
+      const label = typeMap[paneMatch[1].toLowerCase()] || paneMatch[1];
+      return normalized.replace(trimmed, `${label} ${paneMatch[2]}`);
+    }
+
+    // 18. Pattern: N files changed (+X -Y)
+    const filesChangedMatch = trimmed.match(/^(\d+)\s+files?\s+changed$/i);
+    if (filesChangedMatch) {
+      return normalized.replace(trimmed, `${filesChangedMatch[1]} 个文件已修改`);
+    }
+
+    // 19. Pattern: Relative timestamps (e.g. 5m, 23m, 10d, 1mo, 2mo)
+    const timeMatch = trimmed.match(/^(\d+)\s*(mo|d|m|h|s|y)$/i);
+    if (timeMatch) {
+      const num = timeMatch[1];
+      const unit = timeMatch[2].toLowerCase();
+      const unitMap = {
+        'mo': '个月前',
+        'd': '天前',
+        'm': '分钟前',
+        'h': '小时前',
+        's': '秒前',
+        'y': '年前'
+      };
+      return normalized.replace(trimmed, `${num}${unitMap[unit]}`);
+    }
+
+    // 20. Pattern: Upload dates (e.g. Today 12:06 AM, Yesterday 5:00 PM)
+    if (trimmed.startsWith('Today ')) {
+      return normalized.replace('Today ', '今天 ');
+    }
+    if (trimmed.startsWith('Yesterday ')) {
+      return normalized.replace('Yesterday ', '昨天 ');
+    }
+
+    // 21. Substring translation for complex descriptions
     let newText = normalized;
     let modified = false;
     for (const item of substringReplacements) {

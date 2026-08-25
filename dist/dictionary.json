@@ -233,5 +233,15 @@
   "Regenerate": "重新生成",
   "Retry": "重试",
   "Advanced Settings": "高级设置",
-  "Updates": "更新"
+  "Updates": "更新",
+  "Subagents": "子智能体",
+  "Files Changed": "已修改文件",
+  "Artifacts": "产物",
+  "Uploads": "已上传文件",
+  "Background Tasks": "后台任务",
+  "MCP Error": "MCP 异常",
+  "Review": "审核",
+  "Accept": "接受",
+  "Reject": "拒绝",
+  "Recent Conversations": "近期对话"
 }

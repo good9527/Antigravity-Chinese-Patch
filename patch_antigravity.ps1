@@ -335,6 +335,25 @@ try {
     # Type already defined
 }
 
+Function Stop-Client {
+    Write-Host "Closing Antigravity client..." -ForegroundColor Yellow
+    $processes = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue
+    if ($processes) {
+        Stop-Process -Name "Antigravity" -Force
+        Start-Sleep -Seconds 2
+    }
+}
+
+Function Start-Client {
+    $exePath = Join-Path $programDir "Antigravity.exe"
+    if (Test-Path $exePath) {
+        Write-Host "Restarting Antigravity client..." -ForegroundColor Green
+        Start-Process "cmd.exe" -ArgumentList "/c start `"`" `"$exePath`"" -WindowStyle Hidden
+    } else {
+        Write-Warning "Antigravity.exe not found at '$exePath'. Please start it manually."
+    }
+}
+
 Function Show-Menu {
     Clear-Host
     Write-Host "==========================================================" -ForegroundColor Cyan
@@ -429,9 +448,14 @@ Function Apply-Patch {
     Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
 
     if ($patchedSuccessfully) {
+        $processes = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue
+        if ($processes) {
+            Stop-Client
+            Start-Client
+        }
         Write-Host ""
         Write-Host "🎉 汉化补丁安装成功！" -ForegroundColor Green
-        Write-Host "💡 无需退出软件！若反重力软件正在运行中，在软件窗口按 [Ctrl + R] 即可立即生效！" -ForegroundColor Yellow
+        Write-Host "✨ 客户端已自动重启并生效全部中文界面！" -ForegroundColor Green
     }
     
     Write-Host ""
@@ -452,11 +476,13 @@ Function Restore-Backup {
         return
     }
     
+    Stop-Client
+    
     try {
         Write-Host "Restoring original app.asar..." -ForegroundColor Green
         Copy-Item $backupAsar $originalAsar -Force
         Write-Host "Successfully restored original client!" -ForegroundColor Green
-        Write-Host "若软件正在运行中，按 [Ctrl + R] 即可刷新恢复原版界面。" -ForegroundColor Yellow
+        Start-Client
     } catch {
         Write-Host "Error: Failed to restore backup file: $_" -ForegroundColor Red
     }

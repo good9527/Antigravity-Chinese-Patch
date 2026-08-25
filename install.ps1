@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "     Antigravity Chinese Patch Universal Web Installer    " -ForegroundColor Cyan
-Write-Host "     (Zero-Dependency In-Place Hot Injection)             " -ForegroundColor DarkCyan
+Write-Host "     (Zero-Dependency In-Place Native Patch Engine)       " -ForegroundColor DarkCyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -395,8 +395,8 @@ if ($markerIndex -ge 0) {
     $patchCode = $fullContent
 }
 
-# 7. Hot In-Place ASAR Injection (Works seamlessly even while Antigravity is running!)
-Write-Host "Applying dynamic hot in-place ASAR injection (0.05s)..." -ForegroundColor Green
+# 7. Hot In-Place ASAR Injection
+Write-Host "Applying dynamic native in-place ASAR injection (0.05s)..." -ForegroundColor Green
 $tempPatchedAsar = Join-Path $tempDir "app.asar.patched"
 $sourceAsar = if (Test-Path $backupAsar) { $backupAsar } else { $originalAsar }
 
@@ -411,13 +411,22 @@ try {
 # 8. Clean up
 Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
 
-# 9. Notify user
+# 9. Auto restart if running to reload Electron ASAR cache instantly
+$processes = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue
+if ($processes) {
+    Write-Host "Restarting Antigravity client to reload interface..." -ForegroundColor Green
+    Stop-Process -Name "Antigravity" -Force
+    Start-Sleep -Seconds 1
+    $exePath = Join-Path $programDir "Antigravity.exe"
+    if (Test-Path $exePath) {
+        Start-Process "cmd.exe" -ArgumentList "/c start `"`" `"$exePath`"" -WindowStyle Hidden
+    }
+}
+
+# 10. Notify user
 Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "     🎉 汉化补丁安装成功！(Patch Successfully Installed) " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "  ✨ 无需重启软件！如果 Antigravity 正在运行中：" -ForegroundColor Yellow
-Write-Host "     在软件窗口中按 [Ctrl + R] (重新加载) 或新开对话窗口，" -ForegroundColor White
-Write-Host "     即可立即看到中文汉化界面！" -ForegroundColor Green
+Write-Host "  ✨ 客户端已完成汉化！享受 Antigravity 中文体验吧！" -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Cyan
