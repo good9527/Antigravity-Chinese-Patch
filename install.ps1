@@ -2,13 +2,14 @@
 [Console]::InputEncoding = [System.Text.Encoding]::UTF8
 # install.ps1
 # One-click Universal Online Web Installer for Antigravity-Chinese-Patch
+# Features: Zero-Dependency In-Place Hot Patch + Auto-Follow Official Updates (Auto-Heal Daemon)
 # PowerShell: iwr -useb https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1 | iex
 
 $ErrorActionPreference = "Stop"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "     Antigravity Chinese Patch Universal Web Installer    " -ForegroundColor Cyan
-Write-Host "     (Zero-Dependency Safe In-Place Hot Injection)        " -ForegroundColor DarkCyan
+Write-Host "     (Zero-Dependency Hot Patch + Auto-Update Daemon)     " -ForegroundColor DarkCyan
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -364,9 +365,7 @@ public class UniversalAsarEngine {
 
 try {
     Add-Type -TypeDefinition $csharpPatcher -Language CSharp
-} catch {
-    # Type already defined
-}
+} catch {}
 
 # 5. Download latest localization patch
 $tempDir = Join-Path $env:TEMP "antigravity_web_patch_$timestamp"
@@ -391,7 +390,7 @@ if ($markerIndex -ge 0) {
     $patchCode = $fullContent
 }
 
-# 7. Safe In-Place ASAR Injection (100% safe, never terminates Antigravity)
+# 7. Safe In-Place ASAR Injection
 Write-Host "Applying dynamic native in-place ASAR injection (0.05s)..." -ForegroundColor Green
 $tempPatchedAsar = Join-Path $tempDir "app.asar.patched"
 $sourceAsar = if (Test-Path $backupAsar) { $backupAsar } else { $originalAsar }
@@ -404,13 +403,50 @@ try {
     Write-Error "Failed to patch ASAR file. Error: $_"
 }
 
-# 8. Clean up
+# 8. Setup Auto-Healing Daemon (Auto-Follow Google Official Updates)
+try {
+    $patcherDir = Join-Path $programDir "patcher"
+    if (-not (Test-Path $patcherDir)) { New-Item -ItemType Directory -Path $patcherDir -Force | Out-Null }
+    
+    $cachedScript = Join-Path $patcherDir "install.ps1"
+    Copy-Item $downloadedPreload (Join-Path $patcherDir "preload.js") -Force -ErrorAction SilentlyContinue
+    
+    $autoHealScript = Join-Path $patcherDir "auto_heal.ps1"
+    $autoHealContent = @"
+# auto_heal.ps1 - Antigravity Chinese Patch Silent Auto-Heal Watcher
+`$ErrorActionPreference = 'SilentlyContinue'
+`$userPath = '$programDir'
+`$originalAsar = "`$userPath\resources\app.asar"
+
+if (Test-Path `$originalAsar) {
+    `$isPatched = Select-String -Path `$originalAsar -Pattern 'Antigravity Chinese Localization Patch' -Quiet
+    if (-not `$isPatched) {
+        # Official Google update detected! Re-apply patch silently
+        try {
+            `$webScript = (Invoke-RestMethod -Uri 'https://fastly.jsdelivr.net/gh/$repoOwner/$repoName@main/install.ps1' -TimeoutSec 10)
+            Invoke-Expression `$webScript
+        } catch {}
+    }
+}
+"@
+    Set-Content -Path $autoHealScript -Value $autoHealContent -Encoding utf8
+    
+    # Configure HKCU Run to auto-check on startup/login
+    $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+    Set-ItemProperty -Path $regPath -Name "AntigravityChinesePatchAutoHeal" -Value "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$autoHealScript`"" -ErrorAction SilentlyContinue
+    Write-Host "🛡️ 官方更新自动跟随守护已开启 (Auto-Healing Daemon Enabled)!" -ForegroundColor Green
+} catch {
+    # Non-critical, skip if failed
+}
+
+# 9. Clean up
 Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
 
-# 9. Notify user
+# 10. Notify user
 Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "     🎉 汉化补丁安装成功！(Patch Successfully Installed) " -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Cyan
-Write-Host "  ✨ 补丁已写入完成！你可以随时自行重启 Antigravity 客户端生效。" -ForegroundColor Yellow
+Write-Host "  ✨ 汉化已完成并已开启官方更新自动跟随守护！" -ForegroundColor Yellow
+Write-Host "  ✨ 即使谷歌官方后续自动升级，补丁也会在后台自动修复保持汉化！" -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Cyan

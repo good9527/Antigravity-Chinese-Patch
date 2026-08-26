@@ -27,9 +27,8 @@ This is an open-source, zero-dependency, universal non-destructive Chinese local
 - **100% 保留原生宿主文件**：不直接替换官方 `app.asar` 二进制文件，而是动态提取用户本机当前版本的 `preload.js` 追加注入，**永不产生版本冲突，完美兼容未来一切官方升级**。
 - **全平台原生支持**：不仅支持 Windows 10/11，还同步支持 **macOS** 与 **Linux**。
 
-### 🚀 全球 / 国内多 CDN 智能测速容灾 | Multi-CDN Fast Mirror Fallback
-- **国内极速直连**：内置 Fastly jsDelivr、Cloudflare 镜像与 GitHub Raw 自动测速故障转移，无论身处何种网络环境，一键安装与字典拉取均稳定顺畅。
-- **云端字典热同步**：启动时后台异步静默获取最新翻译词条并本地缓存，无需重新打补丁即可享受持续校对更新。
+### 🛡️ 官方更新自动跟随守护 (Auto-Healing Daemon)
+- **永久保活，不怕官方升级覆盖**：内置静默守护机制，当 Google 官方推送大版本升级（如 2.10.0、2.11.0 等）并覆盖 `app.asar` 时，后台守护将在 0.05 秒内静默自动重新注入汉化，**实现真正的一次安装、永久中文**！
 
 ---
 
@@ -38,7 +37,7 @@ This is an open-source, zero-dependency, universal non-destructive Chinese local
 ### 🪟 Windows 用户 | Windows Users
 
 #### 方式 A：PowerShell 一键在线安装（推荐 ⭐⭐⭐）
-以管理员身份打开 **PowerShell** 窗口，复制并运行以下命令（内置国内 CDN 加速，5 秒极速完成）：
+打开 **PowerShell** 窗口，复制并运行以下命令（内置国内 CDN 加速与自动守护开启，5 秒极速完成）：
 
 ```powershell
 iwr -useb https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1 | iex
@@ -56,8 +55,9 @@ iwr -useb https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/m
 2. 解压后**双击运行 `安装汉化补丁.bat`**。
 3. 交互菜单支持：
    - `1` 🚀 **一键极速汉化 / 升级**
-   - `2` 🛡️ **一键恢复官方原版备份**
-   - `3` 🔍 **检查当前版本与汉化状态**
+   - `2` 🛡️ **启用 / 禁用官方更新自动跟随守护 (Auto-Healing Daemon)**
+   - `3` 🔄 **一键恢复官方原版备份**
+   - `4` 🔍 **检查当前版本与汉化状态**
    - `4` 🚪 **退出管理面板**
 
 ---

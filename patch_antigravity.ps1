@@ -2,7 +2,7 @@
 [Console]::InputEncoding = [System.Text.Encoding]::UTF8
 # patch_antigravity.ps1
 # Interactive Elite Toolkit Console for Antigravity-Chinese-Patch
-# Universal, zero-dependency, in-place ASAR patcher & management console
+# Universal, zero-dependency, in-place ASAR patcher & Auto-Healing Daemon Console
 
 $ErrorActionPreference = "Stop"
 
@@ -293,9 +293,10 @@ public class UniversalAsarEngine {
     public static string ReadPackageVersion(string inputAsar) {
         try {
             byte[] asarBytes = File.ReadAllBytes(inputAsar);
+            uint u2 = BitConverter.ToUInt32(asarBytes, 4);
             uint jsonSize = BitConverter.ToUInt32(asarBytes, 12);
             string headerJson = Encoding.UTF8.GetString(asarBytes, 16, (int)jsonSize);
-            long dataStart = 16 + jsonSize;
+            long dataStart = 8 + u2;
             var root = (Dictionary<string, object>)SimpleJson.Parse(headerJson);
             var files = (Dictionary<string, object>)root["files"];
             var pkgNode = (Dictionary<string, object>)files["package.json"];
@@ -331,28 +332,7 @@ public class UniversalAsarEngine {
 
 try {
     Add-Type -TypeDefinition $csharpPatcher -Language CSharp
-} catch {
-    # Type already defined
-}
-
-Function Stop-Client {
-    Write-Host "Closing Antigravity client..." -ForegroundColor Yellow
-    $processes = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue
-    if ($processes) {
-        Stop-Process -Name "Antigravity" -Force
-        Start-Sleep -Seconds 2
-    }
-}
-
-Function Start-Client {
-    $exePath = Join-Path $programDir "Antigravity.exe"
-    if (Test-Path $exePath) {
-        Write-Host "Restarting Antigravity client..." -ForegroundColor Green
-        Start-Process "cmd.exe" -ArgumentList "/c start `"`" `"$exePath`"" -WindowStyle Hidden
-    } else {
-        Write-Warning "Antigravity.exe not found at '$exePath'. Please start it manually."
-    }
-}
+} catch {}
 
 Function Show-Menu {
     Clear-Host
@@ -361,12 +341,13 @@ Function Show-Menu {
     Write-Host "     (Universal In-Place Hot Patch Engine)                " -ForegroundColor DarkCyan
     Write-Host "==========================================================" -ForegroundColor Cyan
     Write-Host "  1. 🚀 Install/Update Chinese Patch (一键极速汉化/更新) " -ForegroundColor Green
-    Write-Host "  2. 🛡️ Restore Original Backup (一键恢复官方原装)" -ForegroundColor Yellow
-    Write-Host "  3. 🔍 Check Status & Client Version (检查当前版本状态)" -ForegroundColor Blue
-    Write-Host "  4. 🚪 Exit (退出)" -ForegroundColor Gray
+    Write-Host "  2. 🛡️ Toggle Auto-Healing Daemon (启用/禁用官方更新自动跟随守护)" -ForegroundColor Magenta
+    Write-Host "  3. 🔄 Restore Original Backup (一键恢复官方原装)" -ForegroundColor Yellow
+    Write-Host "  4. 🔍 Check Status & Client Version (检查当前版本状态)" -ForegroundColor Blue
+    Write-Host "  5. 🚪 Exit (退出)" -ForegroundColor Gray
     Write-Host "==========================================================" -ForegroundColor Cyan
     Write-Host ""
-    $choice = Read-Host "Please select an option [1-4] (请输入选项 [1-4])"
+    $choice = Read-Host "Please select an option [1-5] (请输入选项 [1-5])"
     return $choice
 }
 
@@ -448,14 +429,60 @@ Function Apply-Patch {
     Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
 
     if ($patchedSuccessfully) {
-        $processes = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue
-        if ($processes) {
-            Stop-Client
-            Start-Client
-        }
         Write-Host ""
         Write-Host "🎉 汉化补丁安装成功！" -ForegroundColor Green
-        Write-Host "✨ 客户端已自动重启并生效全部中文界面！" -ForegroundColor Green
+        Write-Host "✨ 补丁已写入完成！可以随时自行重启 Antigravity 客户端生效。" -ForegroundColor Yellow
+    }
+    
+    Write-Host ""
+    Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+}
+
+Function Toggle-AutoHeal {
+    Clear-Host
+    Write-Host "==========================================" -ForegroundColor Magenta
+    Write-Host "     Auto-Healing Daemon Manager          " -ForegroundColor Magenta
+    Write-Host "==========================================" -ForegroundColor Magenta
+    Write-Host ""
+    
+    $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+    $currentVal = (Get-ItemProperty -Path $regPath -ErrorAction SilentlyContinue).AntigravityChinesePatchAutoHeal
+    
+    if ($currentVal) {
+        Write-Host "当前守护状态: [已启用 (ENABLED)]" -ForegroundColor Green
+        $ans = Read-Host "是否需要禁用守护？(y/n)"
+        if ($ans -eq 'y' -or $ans -eq 'Y') {
+            Remove-ItemProperty -Path $regPath -Name "AntigravityChinesePatchAutoHeal" -ErrorAction SilentlyContinue
+            Write-Host "已禁用官方更新自动跟随守护。" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "当前守护状态: [未启用 (DISABLED)]" -ForegroundColor Yellow
+        $ans = Read-Host "是否启用官方更新自动跟随守护？(y/n)"
+        if ($ans -eq 'y' -or $ans -eq 'Y' -or $ans -eq '') {
+            $patcherDir = Join-Path $programDir "patcher"
+            if (-not (Test-Path $patcherDir)) { New-Item -ItemType Directory -Path $patcherDir -Force | Out-Null }
+            $autoHealScript = Join-Path $patcherDir "auto_heal.ps1"
+            $autoHealContent = @"
+# auto_heal.ps1 - Antigravity Chinese Patch Silent Auto-Heal Watcher
+`$ErrorActionPreference = 'SilentlyContinue'
+`$userPath = '$programDir'
+`$originalAsar = "`$userPath\resources\app.asar"
+
+if (Test-Path `$originalAsar) {
+    `$isPatched = Select-String -Path `$originalAsar -Pattern 'Antigravity Chinese Localization Patch' -Quiet
+    if (-not `$isPatched) {
+        try {
+            `$webScript = (Invoke-RestMethod -Uri 'https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1' -TimeoutSec 10)
+            Invoke-Expression `$webScript
+        } catch {}
+    }
+}
+"@
+            Set-Content -Path $autoHealScript -Value $autoHealContent -Encoding utf8
+            Set-ItemProperty -Path $regPath -Name "AntigravityChinesePatchAutoHeal" -Value "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$autoHealScript`""
+            Write-Host "🎉 官方更新自动跟随守护已成功开启！" -ForegroundColor Green
+            Write-Host "即使官方未来自动更新，系统也会在后台自动修复保持汉化！" -ForegroundColor Green
+        }
     }
     
     Write-Host ""
@@ -476,13 +503,10 @@ Function Restore-Backup {
         return
     }
     
-    Stop-Client
-    
     try {
         Write-Host "Restoring original app.asar..." -ForegroundColor Green
         Copy-Item $backupAsar $originalAsar -Force
         Write-Host "Successfully restored original client!" -ForegroundColor Green
-        Start-Client
     } catch {
         Write-Host "Error: Failed to restore backup file: $_" -ForegroundColor Red
     }
@@ -506,10 +530,10 @@ Function Check-Status {
         Write-Host "Active app.asar Size: $sizeMB MB ($size Bytes)" -ForegroundColor Gray
         
         $isPatched = "Unpatched (原装未汉化)"
-        $patchedColor = "Green"
+        $patchedColor = "Yellow"
         if (Select-String -Path $originalAsar -Pattern "Antigravity Chinese Localization Patch" -Quiet) {
             $isPatched = "Patched (已汉化)"
-            $patchedColor = "Cyan"
+            $patchedColor = "Green"
         }
         
         $version = [UniversalAsarEngine]::ReadPackageVersion($originalAsar)
@@ -527,7 +551,11 @@ Function Check-Status {
         Write-Host "Original Backup (app.asar.bak): NOT FOUND (无备份)" -ForegroundColor Yellow
     }
     
-    Write-Host "Engine: Universal In-Place Native Engine (无需 Node.js / 0 外部依赖)" -ForegroundColor Green
+    $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+    $healEnabled = (Get-ItemProperty -Path $regPath -ErrorAction SilentlyContinue).AntigravityChinesePatchAutoHeal
+    $daemonStatus = if ($healEnabled) { "已启用 (Auto-Healing Enabled)" } else { "未启用 (Disabled)" }
+    $daemonColor = if ($healEnabled) { "Green" } else { "Gray" }
+    Write-Host "Auto-Healing Daemon: $daemonStatus" -ForegroundColor $daemonColor
     
     Write-Host ""
     Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
@@ -538,15 +566,16 @@ do {
     $choice = Show-Menu
     switch ($choice) {
         "1" { Apply-Patch }
-        "2" { Restore-Backup }
-        "3" { Check-Status }
-        "4" { break }
+        "2" { Toggle-AutoHeal }
+        "3" { Restore-Backup }
+        "4" { Check-Status }
+        "5" { break }
         default {
             Write-Host "Invalid option. Please try again." -ForegroundColor Red
             Start-Sleep -Seconds 1
         }
     }
-} while ($choice -ne "4")
+} while ($choice -ne "5")
 
 Clear-Host
 Write-Host "Goodbye! Enjoy Antigravity Chinese Patch!" -ForegroundColor Green
