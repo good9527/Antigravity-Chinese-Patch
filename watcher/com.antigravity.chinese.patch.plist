@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.antigravity.chinese.patch</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>[ -f "$HOME/.antigravity-chinese-patch/auto_heal.sh" ] &amp;&amp; /bin/bash "$HOME/.antigravity-chinese-patch/auto_heal.sh"</string>
+    </array>
+    <key>WatchPaths</key>
+    <array>
+        <string>/Applications/Antigravity.app/Contents/Resources/app.asar</string>
+        <string>/Applications/Antigravity.app/Contents/Resources</string>
+        <string>~/Applications/Antigravity.app/Contents/Resources/app.asar</string>
+        <string>~/Applications/Antigravity.app/Contents/Resources</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/tmp/antigravity_patch_autoheal.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/antigravity_patch_autoheal.err</string>
+</dict>
+</plist>

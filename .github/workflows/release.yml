@@ -1,15 +1,42 @@
-name: Release Packages
+name: Test Matrix & Release Packaging
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
+  pull_request:
     branches:
       - main
   workflow_dispatch:
 
 jobs:
-  build-release:
+  test-matrix:
+    name: Test on ${{ matrix.os }} (Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run E2E Test Suite (All Tiers)
+        run: |
+          python tests/test_runner.py --tier all
+
+  package-release:
+    name: Package Release & Checksums
+    needs: test-matrix
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -18,20 +45,37 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create Release Zip Package
+      - name: Package Elite Release Archive
         run: |
-          mkdir -p package/dist
-          cp dist/preload.js package/dist/
-          cp dist/dictionary.json package/dist/
+          mkdir -p package/dist package/watcher
+          cp -r dist/* package/dist/
+          cp -r watcher/* package/watcher/
+          cp install.ps1 package/
+          cp install.sh package/
           cp patch_antigravity.ps1 package/
           cp "安装汉化补丁.bat" package/
           cp README.md package/
           cd package
           zip -r ../Antigravity-Chinese-Patch-Elite.zip ./*
           cd ..
+          sha256sum Antigravity-Chinese-Patch-Elite.zip > Antigravity-Chinese-Patch-Elite.zip.sha256
+          sha256sum Antigravity-Chinese-Patch-Elite.zip > SHA256SUMS.txt
 
-      - name: Upload Artifact
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Antigravity-Chinese-Patch-Elite
-          path: Antigravity-Chinese-Patch-Elite.zip
+          path: |
+            Antigravity-Chinese-Patch-Elite.zip
+            Antigravity-Chinese-Patch-Elite.zip.sha256
+            SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Antigravity-Chinese-Patch-Elite.zip
+            Antigravity-Chinese-Patch-Elite.zip.sha256
+            SHA256SUMS.txt
+          generate_release_notes: true

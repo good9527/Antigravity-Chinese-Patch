@@ -1,0 +1,12 @@
+[Unit]
+Description=Watch Antigravity app.asar for updates
+ConditionPathExists=%h/.local/share/antigravity/resources/app.asar
+
+[Path]
+PathModified=%h/.local/share/antigravity/resources/app.asar
+PathModified=/opt/Antigravity/resources/app.asar
+PathModified=/usr/lib/antigravity/resources/app.asar
+Unit=antigravity-patch.service
+
+[Install]
+WantedBy=paths.target

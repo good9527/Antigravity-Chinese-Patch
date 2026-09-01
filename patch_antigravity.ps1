@@ -1,20 +1,43 @@
-﻿[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-[Console]::InputEncoding = [System.Text.Encoding]::UTF8
-# patch_antigravity.ps1
-# Interactive Elite Toolkit Console for Antigravity-Chinese-Patch
-# Universal, zero-dependency, in-place ASAR patcher & Auto-Healing Daemon Console
+﻿param(
+    [Parameter(Mandatory=$false)][Alias("i")][switch]$Install,
+    [Parameter(Mandatory=$false)][Alias("u")][switch]$Uninstall,
+    [Parameter(Mandatory=$false)][Alias("c")][switch]$Check,
+    [Parameter(Mandatory=$false)][Alias("r")][switch]$Restore,
+    [Parameter(Mandatory=$false)][ValidateSet("enable", "disable", "status", "")][string]$Daemon = "",
+    [Parameter(Mandatory=$false)][switch]$DaemonOn,
+    [Parameter(Mandatory=$false)][switch]$DaemonOff,
+    [Parameter(Mandatory=$false)][Alias("q")][switch]$Quiet,
+    [Parameter(Mandatory=$false)][switch]$Silent,
+    [Parameter(Mandatory=$false)][Alias("p")][string]$Path,
+    [Parameter(Mandatory=$false)][switch]$Json
+)
 
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+[Console]::InputEncoding = [System.Text.Encoding]::UTF8
 $ErrorActionPreference = "Stop"
 
-# 1. Resolve Script Directory
+if ($Silent) { $Quiet = $true }
+
+# 1. Resolve Script Directory & Global Constants
 $scriptDir = $PSScriptRoot
 if (-not $scriptDir) { $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path }
 if (-not $scriptDir) { $scriptDir = Get-Location }
 
+$cacheDir = Join-Path $env:APPDATA "AntigravityChinesePatch"
+$cachedPreload = Join-Path $cacheDir "preload.js"
+$cachedWatcher = Join-Path $cacheDir "watcher.ps1"
+$patchMarker = "// Antigravity Chinese Localization Patch"
+$taskName = "AntigravityChinesePatchWatcher"
+$regRunKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+$regRunName = "AntigravityChinesePatchAutoHeal"
 $localPreloadJs = Join-Path $scriptDir "dist\preload.js"
 
 # 2. Smart Path Resolver
 Function Find-AntigravityPath {
+    if ($Path -and (Test-Path (Join-Path $Path "resources\app.asar"))) {
+        return $Path
+    }
+
     $proc = Get-Process -Name "Antigravity" -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($proc -and $proc.Path) {
         $dir = Split-Path -Parent $proc.Path
@@ -57,8 +80,8 @@ $resourcesDir = "$programDir\resources"
 $originalAsar = "$resourcesDir\app.asar"
 $backupAsar = "$resourcesDir\app.asar.bak"
 
-# 3. Compile Universal Standard C# ASAR Engine in memory
-$csharpPatcher = @"
+# 3. In-Memory Universal C# ASAR Engine Compilation
+$csharpPatcher = @'
 using System;
 using System.IO;
 using System.Text;
@@ -221,6 +244,10 @@ public class UniversalAsarEngine {
 
     public static bool InjectPreload(string inputAsar, string outputAsar, string patchCode) {
         byte[] asarBytes = File.ReadAllBytes(inputAsar);
+        if (asarBytes.Length < 16) throw new Exception("ASAR file too small");
+        uint magic = BitConverter.ToUInt32(asarBytes, 0);
+        if (magic != 4) throw new Exception("Invalid ASAR magic number");
+
         uint u2 = BitConverter.ToUInt32(asarBytes, 4);
         uint jsonSize = BitConverter.ToUInt32(asarBytes, 12);
         long dataStart = 8 + u2;
@@ -293,6 +320,7 @@ public class UniversalAsarEngine {
     public static string ReadPackageVersion(string inputAsar) {
         try {
             byte[] asarBytes = File.ReadAllBytes(inputAsar);
+            if (asarBytes.Length < 16) return "Unknown";
             uint u2 = BitConverter.ToUInt32(asarBytes, 4);
             uint jsonSize = BitConverter.ToUInt32(asarBytes, 12);
             string headerJson = Encoding.UTF8.GetString(asarBytes, 16, (int)jsonSize);
@@ -328,11 +356,25 @@ public class UniversalAsarEngine {
         }
     }
 }
-"@
+'@
 
 try {
-    Add-Type -TypeDefinition $csharpPatcher -Language CSharp
+    if (-not ([System.Management.Automation.PSTypeName]'UniversalAsarEngine').Type) {
+        Add-Type -TypeDefinition $csharpPatcher -Language CSharp
+    }
 } catch {}
+
+# 4. Offline Cache Sync
+Function Sync-Cache {
+    if (-not (Test-Path $cacheDir)) { New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null }
+    if (Test-Path $localPreloadJs) {
+        Copy-Item -Path $localPreloadJs -Destination $cachedPreload -Force
+    }
+    $localWatcher = Join-Path $scriptDir "watcher\watcher.ps1"
+    if (Test-Path $localWatcher) {
+        Copy-Item -Path $localWatcher -Destination $cachedWatcher -Force
+    }
+}
 
 Function Show-Menu {
     Clear-Host
@@ -340,11 +382,11 @@ Function Show-Menu {
     Write-Host "     Antigravity Chinese Patch Elite Toolkit v3.0         " -ForegroundColor Cyan
     Write-Host "     (Universal In-Place Hot Patch Engine)                " -ForegroundColor DarkCyan
     Write-Host "==========================================================" -ForegroundColor Cyan
-    Write-Host "  1. 🚀 Install/Update Chinese Patch (一键极速汉化/更新) " -ForegroundColor Green
-    Write-Host "  2. 🛡️ Toggle Auto-Healing Daemon (启用/禁用官方更新自动跟随守护)" -ForegroundColor Magenta
-    Write-Host "  3. 🔄 Restore Original Backup (一键恢复官方原装)" -ForegroundColor Yellow
-    Write-Host "  4. 🔍 Check Status & Client Version (检查当前版本状态)" -ForegroundColor Blue
-    Write-Host "  5. 🚪 Exit (退出)" -ForegroundColor Gray
+    Write-Host "  1. [Install/Update] Chinese Patch (一键极速汉化/更新) " -ForegroundColor Green
+    Write-Host "  2. [Toggle Daemon]  Auto-Healing (启用/禁用官方更新自动跟随守护)" -ForegroundColor Magenta
+    Write-Host "  3. [Restore Backup] Original Binaries (一键恢复官方原装)" -ForegroundColor Yellow
+    Write-Host "  4. [Check Status]   Client Health & Version (检查当前版本状态)" -ForegroundColor Blue
+    Write-Host "  5. [Exit]           Quit Console (退出)" -ForegroundColor Gray
     Write-Host "==========================================================" -ForegroundColor Cyan
     Write-Host ""
     $choice = Read-Host "Please select an option [1-5] (请输入选项 [1-5])"
@@ -372,8 +414,19 @@ Function Apply-Patch {
         }
     }
     
-    if (-not (Test-Path $localPreloadJs)) {
-        Write-Error "Error: Localization file 'dist\preload.js' not found in script directory."
+    # Resolve preload source
+    $patchCode = $null
+    if (Test-Path $localPreloadJs) {
+        $localContent = Get-Content -Path $localPreloadJs -Raw -Encoding UTF8
+        $idx = $localContent.IndexOf($patchMarker)
+        $patchCode = if ($idx -ge 0) { $localContent.Substring($idx) } else { $localContent }
+        Sync-Cache
+    } elseif (Test-Path $cachedPreload) {
+        $localContent = Get-Content -Path $cachedPreload -Raw -Encoding UTF8
+        $idx = $localContent.IndexOf($patchMarker)
+        $patchCode = if ($idx -ge 0) { $localContent.Substring($idx) } else { $localContent }
+    } else {
+        Write-Error "Error: Localization engine file 'dist\preload.js' not found in script directory or cache."
         Read-Host "Press Enter to return to menu..."
         return
     }
@@ -381,7 +434,7 @@ Function Apply-Patch {
     # Create / Sync Backup of original app.asar
     $isCurrentPatched = $false
     if (Test-Path $originalAsar) {
-        if (Select-String -Path $originalAsar -Pattern "Antigravity Chinese Localization Patch" -Quiet) {
+        if (Select-String -Path $originalAsar -Pattern $patchMarker -Quiet) {
             $isCurrentPatched = $true
         }
     }
@@ -398,44 +451,38 @@ Function Apply-Patch {
         }
     }
 
-    # Extract patch code
-    $localContent = Get-Content -Path $localPreloadJs -Raw -Encoding UTF8
-    $patchMarker = "// Antigravity Chinese Localization Patch"
-    $markerIndex = $localContent.IndexOf($patchMarker)
-    if ($markerIndex -ge 0) {
-        $patchCode = $localContent.Substring($markerIndex)
-    } else {
-        $patchCode = $localContent
-    }
-
-    # Perform Hot In-Place Patch
-    $tempDir = Join-Path $env:TEMP "antigravity_local_patch"
-    if (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue }
-    New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
-    $tempPatchedAsar = Join-Path $tempDir "app.asar.patched"
+    # Perform Hot In-Place Patch with Retry Backoff
+    $tempPatchedAsar = Join-Path $resourcesDir "app.asar.patched"
     $sourceAsar = if (Test-Path $backupAsar) { $backupAsar } else { $originalAsar }
 
     $patchedSuccessfully = $false
-    try {
-        Write-Host "Performing ultra-fast native in-place ASAR injection..." -ForegroundColor Green
-        [UniversalAsarEngine]::InjectPreload($sourceAsar, $tempPatchedAsar, $patchCode) | Out-Null
-        Copy-Item $tempPatchedAsar $originalAsar -Force
-        Write-Host "Dynamic injection applied successfully!" -ForegroundColor Green
-        $patchedSuccessfully = $true
-    } catch {
-        Write-Error "Failed to apply patch: $_"
+    $maxRetries = 5
+    for ($i = 1; $i -le $maxRetries; $i++) {
+        try {
+            Write-Host "Performing native in-place ASAR injection (<50ms)..." -ForegroundColor Green
+            [UniversalAsarEngine]::InjectPreload($sourceAsar, $tempPatchedAsar, $patchCode) | Out-Null
+            Move-Item -Path $tempPatchedAsar -Destination $originalAsar -Force
+            Write-Host "Dynamic injection applied successfully!" -ForegroundColor Green
+            $patchedSuccessfully = $true
+            break
+        } catch {
+            Write-Warning "Attempt $i/$maxRetries to replace ASAR failed (file busy). Retrying..."
+            Start-Sleep -Milliseconds (300 * $i)
+        }
     }
 
-    Remove-Item -Recurse -Force $tempDir -ErrorAction SilentlyContinue
+    if (Test-Path $tempPatchedAsar) { Remove-Item -Path $tempPatchedAsar -Force -ErrorAction SilentlyContinue }
 
     if ($patchedSuccessfully) {
         Write-Host ""
-        Write-Host "🎉 汉化补丁安装成功！" -ForegroundColor Green
-        Write-Host "✨ 补丁已写入完成！可以随时自行重启 Antigravity 客户端生效。" -ForegroundColor Yellow
+        Write-Host "[+] 汉化补丁安装成功！" -ForegroundColor Green
+        Write-Host "[*] 补丁已写入完成！可以随时自行重启 Antigravity 客户端生效。" -ForegroundColor Yellow
     }
     
     Write-Host ""
-    Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+    if (-not $Quiet) {
+        Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+    }
 }
 
 Function Toggle-AutoHeal {
@@ -445,48 +492,44 @@ Function Toggle-AutoHeal {
     Write-Host "==========================================" -ForegroundColor Magenta
     Write-Host ""
     
-    $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-    $currentVal = (Get-ItemProperty -Path $regPath -ErrorAction SilentlyContinue).AntigravityChinesePatchAutoHeal
+    $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+    $runVal = (Get-ItemProperty -Path $regRunKey -ErrorAction SilentlyContinue).$regRunName
+    $isEnabled = ($null -ne $task) -or ($null -ne $runVal)
     
-    if ($currentVal) {
+    if ($isEnabled) {
         Write-Host "当前守护状态: [已启用 (ENABLED)]" -ForegroundColor Green
         $ans = Read-Host "是否需要禁用守护？(y/n)"
         if ($ans -eq 'y' -or $ans -eq 'Y') {
-            Remove-ItemProperty -Path $regPath -Name "AntigravityChinesePatchAutoHeal" -ErrorAction SilentlyContinue
+            Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
+            Remove-ItemProperty -Path $regRunKey -Name $regRunName -ErrorAction SilentlyContinue
             Write-Host "已禁用官方更新自动跟随守护。" -ForegroundColor Yellow
         }
     } else {
         Write-Host "当前守护状态: [未启用 (DISABLED)]" -ForegroundColor Yellow
         $ans = Read-Host "是否启用官方更新自动跟随守护？(y/n)"
         if ($ans -eq 'y' -or $ans -eq 'Y' -or $ans -eq '') {
-            $patcherDir = Join-Path $programDir "patcher"
-            if (-not (Test-Path $patcherDir)) { New-Item -ItemType Directory -Path $patcherDir -Force | Out-Null }
-            $autoHealScript = Join-Path $patcherDir "auto_heal.ps1"
-            $autoHealContent = @"
-# auto_heal.ps1 - Antigravity Chinese Patch Silent Auto-Heal Watcher
-`$ErrorActionPreference = 'SilentlyContinue'
-`$userPath = '$programDir'
-`$originalAsar = "`$userPath\resources\app.asar"
-
-if (Test-Path `$originalAsar) {
-    `$isPatched = Select-String -Path `$originalAsar -Pattern 'Antigravity Chinese Localization Patch' -Quiet
-    if (-not `$isPatched) {
-        try {
-            `$webScript = (Invoke-RestMethod -Uri 'https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1' -TimeoutSec 10)
-            Invoke-Expression `$webScript
-        } catch {}
-    }
-}
-"@
-            Set-Content -Path $autoHealScript -Value $autoHealContent -Encoding utf8
-            Set-ItemProperty -Path $regPath -Name "AntigravityChinesePatchAutoHeal" -Value "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$autoHealScript`""
-            Write-Host "🎉 官方更新自动跟随守护已成功开启！" -ForegroundColor Green
-            Write-Host "即使官方未来自动更新，系统也会在后台自动修复保持汉化！" -ForegroundColor Green
+            Sync-Cache
+            try {
+                $taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$cachedWatcher`""
+                $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
+                $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0 -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
+                $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
+                Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -Principal $principal -Force | Out-Null
+                
+                Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
+                Write-Host "[+] 官方更新自动跟随守护已成功开启！" -ForegroundColor Green
+                Write-Host "[*] 即使官方未来自动更新，系统也会在后台自动修复保持汉化！" -ForegroundColor Green
+            } catch {
+                Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
+                Write-Host "[+] 官方更新自动跟随守护已通过启动项开启！" -ForegroundColor Green
+            }
         }
     }
     
     Write-Host ""
-    Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+    if (-not $Quiet) {
+        Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+    }
 }
 
 Function Restore-Backup {
@@ -499,7 +542,9 @@ Function Restore-Backup {
     if (-not (Test-Path $backupAsar)) {
         Write-Host "Error: No backup file 'app.asar.bak' found. Cannot restore." -ForegroundColor Red
         Write-Host ""
-        Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+        if (-not $Quiet) {
+            Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+        }
         return
     }
     
@@ -512,7 +557,9 @@ Function Restore-Backup {
     }
     
     Write-Host ""
-    Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+    if (-not $Quiet) {
+        Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+    }
 }
 
 Function Check-Status {
@@ -524,26 +571,29 @@ Function Check-Status {
     
     Write-Host "Program Directory: $programDir"
     
+    $isPatched = $false
     if (Test-Path $originalAsar) {
         $size = (Get-Item $originalAsar).Length
         $sizeMB = [Math]::Round($size / 1MB, 2)
         Write-Host "Active app.asar Size: $sizeMB MB ($size Bytes)" -ForegroundColor Gray
         
-        $isPatched = "Unpatched (原装未汉化)"
+        $patchedStatusText = "Unpatched (原装未汉化)"
         $patchedColor = "Yellow"
-        if (Select-String -Path $originalAsar -Pattern "Antigravity Chinese Localization Patch" -Quiet) {
-            $isPatched = "Patched (已汉化)"
+        if (Select-String -Path $originalAsar -Pattern $patchMarker -Quiet) {
+            $patchedStatusText = "Patched (已汉化)"
             $patchedColor = "Green"
+            $isPatched = $true
         }
         
         $version = [UniversalAsarEngine]::ReadPackageVersion($originalAsar)
         Write-Host "Client Version: $version" -ForegroundColor White
-        Write-Host "Patch Status: $isPatched" -ForegroundColor $patchedColor
+        Write-Host "Patch Status: $patchedStatusText" -ForegroundColor $patchedColor
     } else {
         Write-Host "Active app.asar: NOT FOUND (未找到)" -ForegroundColor Red
     }
     
-    if (Test-Path $backupAsar) {
+    $bakExists = (Test-Path $backupAsar)
+    if ($bakExists) {
         $bSize = (Get-Item $backupAsar).Length
         $bSizeMB = [Math]::Round($bSize / 1MB, 2)
         Write-Host "Original Backup (app.asar.bak): EXISTS ($bSizeMB MB)" -ForegroundColor Green
@@ -551,17 +601,68 @@ Function Check-Status {
         Write-Host "Original Backup (app.asar.bak): NOT FOUND (无备份)" -ForegroundColor Yellow
     }
     
-    $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-    $healEnabled = (Get-ItemProperty -Path $regPath -ErrorAction SilentlyContinue).AntigravityChinesePatchAutoHeal
-    $daemonStatus = if ($healEnabled) { "已启用 (Auto-Healing Enabled)" } else { "未启用 (Disabled)" }
-    $daemonColor = if ($healEnabled) { "Green" } else { "Gray" }
+    $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+    $runVal = (Get-ItemProperty -Path $regRunKey -ErrorAction SilentlyContinue).$regRunName
+    $daemonEnabled = ($null -ne $task) -or ($null -ne $runVal)
+    $daemonStatus = if ($daemonEnabled) { "已启用 (Auto-Healing Enabled)" } else { "未启用 (Disabled)" }
+    $daemonColor = if ($daemonEnabled) { "Green" } else { "Gray" }
     Write-Host "Auto-Healing Daemon: $daemonStatus" -ForegroundColor $daemonColor
     
     Write-Host ""
-    Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+    if (-not $Quiet) {
+        Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+    }
 }
 
-# Main Loop
+# 5. CLI Dispatcher (If command line arguments are specified)
+if ($Check) {
+    $splat = @{ Check = $true }
+    if ($Json) { $splat["Json"] = $true }
+    if ($Path) { $splat["Path"] = $Path }
+    if ($Quiet) { $splat["Quiet"] = $true }
+    & "$scriptDir\install.ps1" @splat
+    exit $LASTEXITCODE
+}
+
+if ($Install) {
+    Apply-Patch
+    exit 0
+}
+
+if ($Restore) {
+    Restore-Backup
+    exit 0
+}
+
+if ($Uninstall) {
+    $splat = @{ Uninstall = $true }
+    if ($Quiet) { $splat["Quiet"] = $true }
+    & "$scriptDir\install.ps1" @splat
+    exit $LASTEXITCODE
+}
+
+if ($DaemonOn -or ($Daemon -eq 'enable')) {
+    $splat = @{ Daemon = "enable" }
+    if ($Quiet) { $splat["Quiet"] = $true }
+    & "$scriptDir\install.ps1" @splat
+    exit $LASTEXITCODE
+}
+
+if ($DaemonOff -or ($Daemon -eq 'disable')) {
+    $splat = @{ Daemon = "disable" }
+    if ($Quiet) { $splat["Quiet"] = $true }
+    & "$scriptDir\install.ps1" @splat
+    exit $LASTEXITCODE
+}
+
+if ($Daemon -eq 'status') {
+    $splat = @{ Daemon = "status" }
+    if ($Quiet) { $splat["Quiet"] = $true }
+    & "$scriptDir\install.ps1" @splat
+    exit $LASTEXITCODE
+}
+
+# Interactive Menu Loop
 do {
     $choice = Show-Menu
     switch ($choice) {

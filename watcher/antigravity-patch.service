@@ -1,0 +1,7 @@
+[Unit]
+Description=Antigravity Chinese Patch Auto-Healing Service
+After=antigravity-patch.path
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash %h/.antigravity-chinese-patch/auto_heal.sh

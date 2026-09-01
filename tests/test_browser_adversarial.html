@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Adversarial Safety & Sandbox Isolation Test Harness</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #d4d4d4; }
+    .pass { color: #4ec9b0; }
+    .fail { color: #f44747; font-weight: bold; }
+    pre { background: #252526; padding: 10px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Antigravity Localization Engine — Adversarial Stress Test</h1>
+  <div id="test-sandbox"></div>
+  <div id="results-summary">Running adversarial tests...</div>
+  <pre id="test-log"></pre>
+
+  <!-- Load Localization Engine -->
+  <script src="../dist/engine.js"></script>
+
+  <script>
+    (async function() {
+      const logEl = document.getElementById('test-log');
+      const summaryEl = document.getElementById('results-summary');
+      const sandbox = document.getElementById('test-sandbox');
+      
+      const testResults = {
+        total: 0,
+        passed: 0,
+        failed: 0,
+        tests: []
+      };
+
+      function log(msg) {
+        logEl.textContent += msg + '\n';
+      }
+
+      function assert(condition, name, details = '') {
+        testResults.total++;
+        if (condition) {
+          testResults.passed++;
+          testResults.tests.push({ name, status: 'PASS', details });
+          log(`[PASS] ${name} ${details ? '(' + details + ')' : ''}`);
+        } else {
+          testResults.failed++;
+          testResults.tests.push({ name, status: 'FAIL', details });
+          log(`[FAIL] ${name} - FAILED: ${details}`);
+        }
+      }
+
+      function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+
+      log('Starting Adversarial Stress Testing on Engine in Chromium V8...');
+      log('======================================================================');
+
+      // -----------------------------------------------------------------------
+      // ADVERSARIAL TEST 1: Complex Nested Monaco Editor Trees
+      // -----------------------------------------------------------------------
+      log('\n--- ADV-1: Complex Nested Monaco Editor Trees (0% Code Translation) ---');
+      const monacoContainer = document.createElement('div');
+      monacoContainer.className = 'monaco-editor vs-dark';
+      monacoContainer.innerHTML = `
+        <div class="overflow-guard">
+          <div class="monaco-scrollable-element">
+            <div class="lines-content monaco-editor-background">
+              <div class="view-lines">
+                <div class="view-line" style="top:0px;height:18px;">
+                  <span class="mtk1">const</span> <span class="mtk4">Settings</span> = <span class="mtk5">"Close"</span>;
+                </div>
+                <div class="view-line" style="top:18px;height:18px;">
+                  <span class="mtk6">function</span> <span class="mtk7">deleteConversation</span>() {
+                </div>
+                <div class="view-line" style="top:36px;height:18px;">
+                  <span class="mtk1">&nbsp;&nbsp;</span><span class="mtk6">return</span> <span class="mtk5">"Save"</span>;
+                </div>
+                <div class="view-line" style="top:54px;height:18px;">
+                  }
+                </div>
+                <div class="view-line" style="top:72px;height:18px;">
+                  <span class="mtk3">// Files Changed 3, Subagents 0, Completed in 5s</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      sandbox.appendChild(monacoContainer);
+      await sleep(20);
+
+      // Verify static walk on Monaco
+      const monacoText = monacoContainer.textContent;
+      assert(monacoText.includes('const Settings = "Close";'), 'ADV-1.1: Monaco const Settings = "Close" intact');
+      assert(monacoText.includes('function deleteConversation() {'), 'ADV-1.2: Monaco function deleteConversation() intact');
+      assert(monacoText.includes('return "Save";'), 'ADV-1.3: Monaco return "Save" intact');
+      assert(monacoText.includes('Files Changed 3, Subagents 0, Completed in 5s'), 'ADV-1.4: Monaco comments with regex phrases intact');
+      assert(!monacoText.includes('设置'), 'ADV-1.5: No "设置" injected into Monaco');
+      assert(!monacoText.includes('关闭'), 'ADV-1.6: No "关闭" injected into Monaco');
+      assert(!monacoText.includes('保存'), 'ADV-1.7: No "保存" injected into Monaco');
+      assert(!monacoText.includes('已修改文件'), 'ADV-1.8: No "已修改文件" injected into Monaco');
+
+      // Test dynamic mutation inside Monaco
+      const dynamicLine = document.createElement('div');
+      dynamicLine.className = 'view-line';
+      dynamicLine.innerHTML = '<span class="mtk5">"Delete All Conversations and Clear History"</span>';
+      monacoContainer.querySelector('.view-lines').appendChild(dynamicLine);
+      await sleep(30);
+
+      assert(dynamicLine.textContent.includes('Delete All Conversations and Clear History'), 'ADV-1.9: Dynamic Monaco line mutation preserved');
+      assert(!dynamicLine.textContent.includes('删除所有对话'), 'ADV-1.10: Dynamic Monaco line not translated');
+
+      // -----------------------------------------------------------------------
+      // ADVERSARIAL TEST 2: Complex Markdown Code Fences
+      // -----------------------------------------------------------------------
+      log('\n--- ADV-2: Complex Markdown Code Fences (<pre><code class="hljs">) ---');
+      const mdContainer = document.createElement('div');
+      mdContainer.className = 'markdown-rendered-content';
+      mdContainer.innerHTML = `
+        <p class="ui-para">New Conversation</p>
+        <pre><code class="hljs language-javascript">let x = "Files Changed";
+function cancelTask() {
+  const status = "Thinking for 1.5s";
+  console.log("Subagents 4");
+  return "Done in 2.3s";
+}</code></pre>
+        <p class="ui-para">Delete Conversation</p>
+      `;
+      sandbox.appendChild(mdContainer);
+      await sleep(30);
+
+      const codeEl = mdContainer.querySelector('code');
+      const paras = mdContainer.querySelectorAll('p.ui-para');
+
+      assert(codeEl.textContent.includes('let x = "Files Changed";'), 'ADV-2.1: Code fence variable assignment intact');
+      assert(codeEl.textContent.includes('const status = "Thinking for 1.5s";'), 'ADV-2.2: Code fence timer string intact');
+      assert(codeEl.textContent.includes('console.log("Subagents 4");'), 'ADV-2.3: Code fence console.log intact');
+      assert(codeEl.textContent.includes('return "Done in 2.3s";'), 'ADV-2.4: Code fence return string intact');
+      assert(!codeEl.textContent.includes('已修改文件'), 'ADV-2.5: No Chinese in code fence');
+      assert(!codeEl.textContent.includes('思考中'), 'ADV-2.6: No timer translation in code fence');
+      
+      // Verify outside UI paragraphs ARE translated
+      assert(paras[0].textContent.includes('新建对话'), 'ADV-2.7: Surrounding UI paragraph translated (New Conversation -> 新建对话)');
+      assert(paras[1].textContent.includes('删除对话'), 'ADV-2.8: Surrounding UI paragraph translated (Delete Conversation -> 删除对话)');
+
+      // -----------------------------------------------------------------------
+      // ADVERSARIAL TEST 3: High-Frequency Terminal Streams (xterm ANSI)
+      // -----------------------------------------------------------------------
+      log('\n--- ADV-3: High-Frequency Terminal Streams (.xterm-rows with ANSI) ---');
+      const termContainer = document.createElement('div');
+      termContainer.className = 'terminal xterm xterm-screen';
+      termContainer.innerHTML = '<div class="xterm-viewport"><div class="xterm-rows"></div></div>';
+      sandbox.appendChild(termContainer);
+      const xtermRows = termContainer.querySelector('.xterm-rows');
+
+      const streamLines = [
+        '\x1b[32m[SUCCESS]\x1b[0m Save File complete: /workspace/test.py',
+        '\x1b[31;1m[ERROR]\x1b[0m Delete Conversation failed with exit code 1',
+        '\x1b[33m[WARN]\x1b[0m Files Changed 5, Subagents 2 running',
+        '\x1b[36m[PROGRESS]\x1b[0m Thinking for 2.4s ... Working for 5.1s',
+        '\x1b[0mCompleted in 12.5s'
+      ];
+
+      // Rapidly burst 100 terminal stream lines
+      for (let i = 0; i < 100; i++) {
+        const lineDiv = document.createElement('div');
+        lineDiv.className = 'xterm-row';
+        lineDiv.textContent = streamLines[i % streamLines.length];
+        xtermRows.appendChild(lineDiv);
+      }
+      await sleep(50);
+
+      let terminalCorrupted = false;
+      const allRows = xtermRows.querySelectorAll('.xterm-row');
+      for (let i = 0; i < allRows.length; i++) {
+        const rowText = allRows[i].textContent;
+        const origText = streamLines[i % streamLines.length];
+        if (rowText !== origText) {
+          terminalCorrupted = true;
+          log(`Terminal mismatch at row ${i}: expected "${origText}", got "${rowText}"`);
+          break;
+        }
+      }
+
+      assert(!terminalCorrupted, 'ADV-3.1: 100 rapid terminal streaming rows preserved 100% byte-exact');
+      assert(allRows.length === 100, 'ADV-3.2: All 100 streaming rows present');
+
+      // -----------------------------------------------------------------------
+      // ADVERSARIAL TEST 4: User Input Protection (<textarea> & <input type="text">)
+      // -----------------------------------------------------------------------
+      log('\n--- ADV-4: User Input Protection (Textarea & Text Input) ---');
+      const inputForm = document.createElement('div');
+      inputForm.className = 'user-chat-form';
+      inputForm.innerHTML = `
+        <textarea id="adv-textarea" placeholder="Search conversations..." title="Conversation Input">Delete all conversations and Save this File</textarea>
+        <input type="text" id="adv-textinput" placeholder="Filter by date" title="Date Filter" value="Delete all conversations">
+        <div contenteditable="true" id="adv-contenteditable">Please Close and Cancel the current task.</div>
+      `;
+      sandbox.appendChild(inputForm);
+      await sleep(30);
+
+      const textareaEl = document.getElementById('adv-textarea');
+      const textinputEl = document.getElementById('adv-textinput');
+      const ceEl = document.getElementById('adv-contenteditable');
+
+      // Check placeholder and title translated
+      assert(textareaEl.getAttribute('placeholder') === '搜索对话...', 'ADV-4.1: Textarea placeholder translated to 搜索对话...');
+      assert(textinputEl.getAttribute('placeholder') === '按日期筛选', 'ADV-4.2: Input text placeholder translated to 按日期筛选');
+
+      // Check user typed text/value NEVER translated
+      assert(textareaEl.value === 'Delete all conversations and Save this File', 'ADV-4.3: Textarea user value intact');
+      assert(textareaEl.textContent === 'Delete all conversations and Save this File', 'ADV-4.4: Textarea child text intact');
+      assert(textinputEl.value === 'Delete all conversations', 'ADV-4.5: Input text value intact');
+      assert(ceEl.textContent === 'Please Close and Cancel the current task.', 'ADV-4.6: Contenteditable user draft intact');
+      assert(!ceEl.textContent.includes('关闭'), 'ADV-4.7: Contenteditable has no "关闭"');
+
+      // Dynamic User Typing Simulation
+      textareaEl.value = 'New Conversation: Delete All';
+      textinputEl.value = 'Settings and Files Changed';
+      await sleep(30);
+
+      assert(textareaEl.value === 'New Conversation: Delete All', 'ADV-4.8: Dynamic typing into textarea preserved');
+      assert(textinputEl.value === 'Settings and Files Changed', 'ADV-4.9: Dynamic typing into text input preserved');
+
+      // -----------------------------------------------------------------------
+      // ADVERSARIAL TEST 5: Button Input Value Labels
+      // -----------------------------------------------------------------------
+      log('\n--- ADV-5: Button Input Value Labels (<input type="submit|button|reset">) ---');
+      const buttonForm = document.createElement('div');
+      buttonForm.className = 'button-group';
+      buttonForm.innerHTML = `
+        <input type="submit" id="adv-submit" value="Save" title="Save File">
+        <input type="button" id="adv-button" value="Cancel" title="Cancel Action">
+        <input type="reset" id="adv-reset" value="Reset">
+        <button id="adv-std-button">Close</button>
+      `;
+      sandbox.appendChild(buttonForm);
+      await sleep(30);
+
+      const submitBtn = document.getElementById('adv-submit');
+      const cancelBtn = document.getElementById('adv-button');
+      const resetBtn = document.getElementById('adv-reset');
+      const stdBtn = document.getElementById('adv-std-button');
+
+      assert(submitBtn.getAttribute('value') === '保存', `ADV-5.1: <input type="submit"> value translated ("Save" -> "${submitBtn.getAttribute('value')}")`);
+      assert(cancelBtn.getAttribute('value') === '取消', `ADV-5.2: <input type="button"> value translated ("Cancel" -> "${cancelBtn.getAttribute('value')}")`);
+      assert(resetBtn.getAttribute('value') === '重置', `ADV-5.3: <input type="reset"> value translated ("Reset" -> "${resetBtn.getAttribute('value')}")`);
+      assert(stdBtn.textContent.trim() === '关闭', `ADV-5.4: Standard <button> text translated ("Close" -> "${stdBtn.textContent.trim()}")`);
+      assert(submitBtn.getAttribute('title') === '保存文件', `ADV-5.5: Submit button title translated ("Save File" -> "${submitBtn.getAttribute('title')}")`);
+
+      // Dynamic button value changes
+      submitBtn.setAttribute('value', 'Delete Conversation');
+      cancelBtn.setAttribute('value', 'Close');
+      await sleep(30);
+
+      assert(submitBtn.getAttribute('value') === '删除对话', `ADV-5.6: Dynamic submit button value change translated ("Delete Conversation" -> "${submitBtn.getAttribute('value')}")`);
+      assert(cancelBtn.getAttribute('value') === '关闭', `ADV-5.7: Dynamic button value change translated ("Close" -> "${cancelBtn.getAttribute('value')}")`);
+
+      // -----------------------------------------------------------------------
+      // ADVERSARIAL TEST 6: Web Components & Shadow DOM Sandbox Isolation
+      // -----------------------------------------------------------------------
+      log('\n--- ADV-6: Shadow DOM Sandbox Isolation ---');
+      const hostEl = document.createElement('div');
+      hostEl.id = 'shadow-host';
+      sandbox.appendChild(hostEl);
+      const shadowRoot = hostEl.attachShadow({ mode: 'open' });
+      shadowRoot.innerHTML = `
+        <div class="shadow-panel">
+          <button class="shadow-btn">Settings</button>
+          <div class="monaco-editor">
+            <span class="code-token">const Settings = "Settings";</span>
+          </div>
+          <span class="shadow-badge">Files Changed 7</span>
+        </div>
+      `;
+      await sleep(40);
+
+      const shadowBtn = shadowRoot.querySelector('.shadow-btn');
+      const shadowCode = shadowRoot.querySelector('.code-token');
+      const shadowBadge = shadowRoot.querySelector('.shadow-badge');
+
+      assert(shadowBtn.textContent.trim() === '设置', `ADV-6.1: Shadow DOM UI button translated ("Settings" -> "${shadowBtn.textContent.trim()}")`);
+      assert(shadowCode.textContent.trim() === 'const Settings = "Settings";', `ADV-6.2: Shadow DOM Monaco code isolated and intact ("${shadowCode.textContent.trim()}")`);
+      assert(shadowBadge.textContent.trim() === '已修改文件 7', `ADV-6.3: Shadow DOM dynamic counter translated ("${shadowBadge.textContent.trim()}")`);
+
+      // -----------------------------------------------------------------------
+      // TEST SUITE SUMMARY
+      // -----------------------------------------------------------------------
+      log('\n======================================================================');
+      log(`ADVERSARIAL STRESS TEST SUMMARY: ${testResults.passed}/${testResults.total} PASSED, ${testResults.failed} FAILED`);
+      log('======================================================================');
+
+      summaryEl.textContent = JSON.stringify(testResults);
+      summaryEl.className = testResults.failed === 0 ? 'pass' : 'fail';
+      
+      // Also attach to window for programmatic extraction
+      window.__ADVERSARIAL_TEST_RESULTS__ = testResults;
+    })();
+  </script>
+</body>
+</html>
