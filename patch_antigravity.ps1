@@ -1,4 +1,4 @@
-﻿param(
+param(
     [Parameter(Mandatory=$false)][Alias("i")][switch]$Install,
     [Parameter(Mandatory=$false)][Alias("u")][switch]$Uninstall,
     [Parameter(Mandatory=$false)][Alias("c")][switch]$Check,
@@ -382,14 +382,14 @@ Function Show-Menu {
     Write-Host "     Antigravity Chinese Patch Elite Toolkit v3.0         " -ForegroundColor Cyan
     Write-Host "     (Universal In-Place Hot Patch Engine)                " -ForegroundColor DarkCyan
     Write-Host "==========================================================" -ForegroundColor Cyan
-    Write-Host "  1. [Install/Update] Chinese Patch (一键极速汉化/更新) " -ForegroundColor Green
-    Write-Host "  2. [Toggle Daemon]  Auto-Healing (启用/禁用官方更新自动跟随守护)" -ForegroundColor Magenta
-    Write-Host "  3. [Restore Backup] Original Binaries (一键恢复官方原装)" -ForegroundColor Yellow
-    Write-Host "  4. [Check Status]   Client Health & Version (检查当前版本状态)" -ForegroundColor Blue
-    Write-Host "  5. [Exit]           Quit Console (退出)" -ForegroundColor Gray
+    Write-Host ("  1. [Install/Update] Chinese Patch ("+([char]0x4e00)+([char]0x952e)+([char]0x6781)+([char]0x901f)+([char]0x6c49)+([char]0x5316)+"/"+([char]0x66f4)+([char]0x65b0)+") ") -ForegroundColor Green
+    Write-Host ("  2. [Toggle Daemon]  Auto-Healing ("+([char]0x542f)+([char]0x7528)+"/"+([char]0x7981)+([char]0x7528)+([char]0x5b98)+([char]0x65b9)+([char]0x66f4)+([char]0x65b0)+([char]0x81ea)+([char]0x52a8)+([char]0x8ddf)+([char]0x968f)+([char]0x5b88)+([char]0x62a4)+")") -ForegroundColor Magenta
+    Write-Host ("  3. [Restore Backup] Original Binaries ("+([char]0x4e00)+([char]0x952e)+([char]0x6062)+([char]0x590d)+([char]0x5b98)+([char]0x65b9)+([char]0x539f)+([char]0x88c5)+")") -ForegroundColor Yellow
+    Write-Host ("  4. [Check Status]   Client Health & Version ("+([char]0x68c0)+([char]0x67e5)+([char]0x5f53)+([char]0x524d)+([char]0x7248)+([char]0x672c)+([char]0x72b6)+([char]0x6001)+")") -ForegroundColor Blue
+    Write-Host ("  5. [Exit]           Quit Console ("+([char]0x9000)+([char]0x51fa)+")") -ForegroundColor Gray
     Write-Host "==========================================================" -ForegroundColor Cyan
     Write-Host ""
-    $choice = Read-Host "Please select an option [1-5] (请输入选项 [1-5])"
+    $choice = Read-Host ("Please select an option [1-5] ("+([char]0x8bf7)+([char]0x8f93)+([char]0x5165)+([char]0x9009)+([char]0x9879)+" [1-5])")
     return $choice
 }
 
@@ -475,13 +475,13 @@ Function Apply-Patch {
 
     if ($patchedSuccessfully) {
         Write-Host ""
-        Write-Host "[+] 汉化补丁安装成功！" -ForegroundColor Green
-        Write-Host "[*] 补丁已写入完成！可以随时自行重启 Antigravity 客户端生效。" -ForegroundColor Yellow
+        Write-Host ("[+] "+([char]0x6c49)+([char]0x5316)+([char]0x8865)+([char]0x4e01)+([char]0x5b89)+([char]0x88c5)+([char]0x6210)+([char]0x529f)+([char]0xff01)) -ForegroundColor Green
+        Write-Host ("[*] "+([char]0x8865)+([char]0x4e01)+([char]0x5df2)+([char]0x5199)+([char]0x5165)+([char]0x5b8c)+([char]0x6210)+([char]0xff01)+([char]0x53ef)+([char]0x4ee5)+([char]0x968f)+([char]0x65f6)+([char]0x81ea)+([char]0x884c)+([char]0x91cd)+([char]0x542f)+" Antigravity "+([char]0x5ba2)+([char]0x6237)+([char]0x7aef)+([char]0x751f)+([char]0x6548)+([char]0x3002)) -ForegroundColor Yellow
     }
     
     Write-Host ""
     if (-not $Quiet) {
-        Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+        Read-Host ("Press Enter to return to menu... ("+([char]0x6309)+([char]0x56de)+([char]0x8f66)+([char]0x8fd4)+([char]0x56de)+([char]0x4e3b)+([char]0x83dc)+([char]0x5355)+"...)")
     }
 }
 
@@ -497,16 +497,16 @@ Function Toggle-AutoHeal {
     $isEnabled = ($null -ne $task) -or ($null -ne $runVal)
     
     if ($isEnabled) {
-        Write-Host "当前守护状态: [已启用 (ENABLED)]" -ForegroundColor Green
-        $ans = Read-Host "是否需要禁用守护？(y/n)"
+        Write-Host (([char]0x5f53)+([char]0x524d)+([char]0x5b88)+([char]0x62a4)+([char]0x72b6)+([char]0x6001)+": ["+([char]0x5df2)+([char]0x542f)+([char]0x7528)+" (ENABLED)]") -ForegroundColor Green
+        $ans = Read-Host (([char]0x662f)+([char]0x5426)+([char]0x9700)+([char]0x8981)+([char]0x7981)+([char]0x7528)+([char]0x5b88)+([char]0x62a4)+([char]0xff1f)+"(y/n)")
         if ($ans -eq 'y' -or $ans -eq 'Y') {
             Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
             Remove-ItemProperty -Path $regRunKey -Name $regRunName -ErrorAction SilentlyContinue
-            Write-Host "已禁用官方更新自动跟随守护。" -ForegroundColor Yellow
+            Write-Host (([char]0x5df2)+([char]0x7981)+([char]0x7528)+([char]0x5b98)+([char]0x65b9)+([char]0x66f4)+([char]0x65b0)+([char]0x81ea)+([char]0x52a8)+([char]0x8ddf)+([char]0x968f)+([char]0x5b88)+([char]0x62a4)+([char]0x3002)) -ForegroundColor Yellow
         }
     } else {
-        Write-Host "当前守护状态: [未启用 (DISABLED)]" -ForegroundColor Yellow
-        $ans = Read-Host "是否启用官方更新自动跟随守护？(y/n)"
+        Write-Host (([char]0x5f53)+([char]0x524d)+([char]0x5b88)+([char]0x62a4)+([char]0x72b6)+([char]0x6001)+": ["+([char]0x672a)+([char]0x542f)+([char]0x7528)+" (DISABLED)]") -ForegroundColor Yellow
+        $ans = Read-Host (([char]0x662f)+([char]0x5426)+([char]0x542f)+([char]0x7528)+([char]0x5b98)+([char]0x65b9)+([char]0x66f4)+([char]0x65b0)+([char]0x81ea)+([char]0x52a8)+([char]0x8ddf)+([char]0x968f)+([char]0x5b88)+([char]0x62a4)+([char]0xff1f)+"(y/n)")
         if ($ans -eq 'y' -or $ans -eq 'Y' -or $ans -eq '') {
             Sync-Cache
             try {
@@ -517,18 +517,18 @@ Function Toggle-AutoHeal {
                 Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -Principal $principal -Force | Out-Null
                 
                 Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
-                Write-Host "[+] 官方更新自动跟随守护已成功开启！" -ForegroundColor Green
-                Write-Host "[*] 即使官方未来自动更新，系统也会在后台自动修复保持汉化！" -ForegroundColor Green
+                Write-Host ("[+] "+([char]0x5b98)+([char]0x65b9)+([char]0x66f4)+([char]0x65b0)+([char]0x81ea)+([char]0x52a8)+([char]0x8ddf)+([char]0x968f)+([char]0x5b88)+([char]0x62a4)+([char]0x5df2)+([char]0x6210)+([char]0x529f)+([char]0x5f00)+([char]0x542f)+([char]0xff01)) -ForegroundColor Green
+                Write-Host ("[*] "+([char]0x5373)+([char]0x4f7f)+([char]0x5b98)+([char]0x65b9)+([char]0x672a)+([char]0x6765)+([char]0x81ea)+([char]0x52a8)+([char]0x66f4)+([char]0x65b0)+([char]0xff0c)+([char]0x7cfb)+([char]0x7edf)+([char]0x4e5f)+([char]0x4f1a)+([char]0x5728)+([char]0x540e)+([char]0x53f0)+([char]0x81ea)+([char]0x52a8)+([char]0x4fee)+([char]0x590d)+([char]0x4fdd)+([char]0x6301)+([char]0x6c49)+([char]0x5316)+([char]0xff01)) -ForegroundColor Green
             } catch {
                 Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
-                Write-Host "[+] 官方更新自动跟随守护已通过启动项开启！" -ForegroundColor Green
+                Write-Host ("[+] "+([char]0x5b98)+([char]0x65b9)+([char]0x66f4)+([char]0x65b0)+([char]0x81ea)+([char]0x52a8)+([char]0x8ddf)+([char]0x968f)+([char]0x5b88)+([char]0x62a4)+([char]0x5df2)+([char]0x901a)+([char]0x8fc7)+([char]0x542f)+([char]0x52a8)+([char]0x9879)+([char]0x5f00)+([char]0x542f)+([char]0xff01)) -ForegroundColor Green
             }
         }
     }
     
     Write-Host ""
     if (-not $Quiet) {
-        Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+        Read-Host ("Press Enter to return to menu... ("+([char]0x6309)+([char]0x56de)+([char]0x8f66)+([char]0x8fd4)+([char]0x56de)+([char]0x4e3b)+([char]0x83dc)+([char]0x5355)+"...)")
     }
 }
 
@@ -543,7 +543,7 @@ Function Restore-Backup {
         Write-Host "Error: No backup file 'app.asar.bak' found. Cannot restore." -ForegroundColor Red
         Write-Host ""
         if (-not $Quiet) {
-            Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+            Read-Host ("Press Enter to return to menu... ("+([char]0x6309)+([char]0x56de)+([char]0x8f66)+([char]0x8fd4)+([char]0x56de)+([char]0x4e3b)+([char]0x83dc)+([char]0x5355)+"...)")
         }
         return
     }
@@ -558,7 +558,7 @@ Function Restore-Backup {
     
     Write-Host ""
     if (-not $Quiet) {
-        Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+        Read-Host ("Press Enter to return to menu... ("+([char]0x6309)+([char]0x56de)+([char]0x8f66)+([char]0x8fd4)+([char]0x56de)+([char]0x4e3b)+([char]0x83dc)+([char]0x5355)+"...)")
     }
 }
 
@@ -577,10 +577,10 @@ Function Check-Status {
         $sizeMB = [Math]::Round($size / 1MB, 2)
         Write-Host "Active app.asar Size: $sizeMB MB ($size Bytes)" -ForegroundColor Gray
         
-        $patchedStatusText = "Unpatched (原装未汉化)"
+        $patchedStatusText = ("Unpatched ("+([char]0x539f)+([char]0x88c5)+([char]0x672a)+([char]0x6c49)+([char]0x5316)+")")
         $patchedColor = "Yellow"
         if (Select-String -Path $originalAsar -Pattern $patchMarker -Quiet) {
-            $patchedStatusText = "Patched (已汉化)"
+            $patchedStatusText = ("Patched ("+([char]0x5df2)+([char]0x6c49)+([char]0x5316)+")")
             $patchedColor = "Green"
             $isPatched = $true
         }
@@ -589,7 +589,7 @@ Function Check-Status {
         Write-Host "Client Version: $version" -ForegroundColor White
         Write-Host "Patch Status: $patchedStatusText" -ForegroundColor $patchedColor
     } else {
-        Write-Host "Active app.asar: NOT FOUND (未找到)" -ForegroundColor Red
+        Write-Host ("Active app.asar: NOT FOUND ("+([char]0x672a)+([char]0x627e)+([char]0x5230)+")") -ForegroundColor Red
     }
     
     $bakExists = (Test-Path $backupAsar)
@@ -598,19 +598,19 @@ Function Check-Status {
         $bSizeMB = [Math]::Round($bSize / 1MB, 2)
         Write-Host "Original Backup (app.asar.bak): EXISTS ($bSizeMB MB)" -ForegroundColor Green
     } else {
-        Write-Host "Original Backup (app.asar.bak): NOT FOUND (无备份)" -ForegroundColor Yellow
+        Write-Host ("Original Backup (app.asar.bak): NOT FOUND ("+([char]0x65e0)+([char]0x5907)+([char]0x4efd)+")") -ForegroundColor Yellow
     }
     
     $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
     $runVal = (Get-ItemProperty -Path $regRunKey -ErrorAction SilentlyContinue).$regRunName
     $daemonEnabled = ($null -ne $task) -or ($null -ne $runVal)
-    $daemonStatus = if ($daemonEnabled) { "已启用 (Auto-Healing Enabled)" } else { "未启用 (Disabled)" }
+    $daemonStatus = if ($daemonEnabled) { (([char]0x5df2)+([char]0x542f)+([char]0x7528)+" (Auto-Healing Enabled)") } else { (([char]0x672a)+([char]0x542f)+([char]0x7528)+" (Disabled)") }
     $daemonColor = if ($daemonEnabled) { "Green" } else { "Gray" }
     Write-Host "Auto-Healing Daemon: $daemonStatus" -ForegroundColor $daemonColor
     
     Write-Host ""
     if (-not $Quiet) {
-        Read-Host "Press Enter to return to menu... (按回车返回主菜单...)"
+        Read-Host ("Press Enter to return to menu... ("+([char]0x6309)+([char]0x56de)+([char]0x8f66)+([char]0x8fd4)+([char]0x56de)+([char]0x4e3b)+([char]0x83dc)+([char]0x5355)+"...)")
     }
 }
 

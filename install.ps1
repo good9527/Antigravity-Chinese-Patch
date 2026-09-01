@@ -1,4 +1,4 @@
-﻿param(
+param(
     [Parameter(Mandatory=$false)][Alias("i")][switch]$Install,
     [Parameter(Mandatory=$false)][Alias("u")][switch]$Uninstall,
     [Parameter(Mandatory=$false)][Alias("c")][switch]$Check,
@@ -650,10 +650,10 @@ Function Invoke-InstallPatch {
 
     Write-Msg ""
     Write-Msg "==========================================================" "Cyan"
-    Write-Msg "     [+] 汉化补丁安装成功！(Patch Successfully Installed) " "Green"
+    Write-Msg ("     [+] "+([char]0x6c49)+([char]0x5316)+([char]0x8865)+([char]0x4e01)+([char]0x5b89)+([char]0x88c5)+([char]0x6210)+([char]0x529f)+([char]0xff01)+"(Patch Successfully Installed) ") "Green"
     Write-Msg "==========================================================" "Cyan"
-    Write-Msg "  [*] 零进程中断完成汉化，已开启官方更新自动跟随守护！" "Yellow"
-    Write-Msg "  [*] 刷新界面 (Ctrl+R) 或重启 Antigravity 即可查看完整汉化。" "Green"
+    Write-Msg ("  [*] "+([char]0x96f6)+([char]0x8fdb)+([char]0x7a0b)+([char]0x4e2d)+([char]0x65ad)+([char]0x5b8c)+([char]0x6210)+([char]0x6c49)+([char]0x5316)+([char]0xff0c)+([char]0x5df2)+([char]0x5f00)+([char]0x542f)+([char]0x5b98)+([char]0x65b9)+([char]0x66f4)+([char]0x65b0)+([char]0x81ea)+([char]0x52a8)+([char]0x8ddf)+([char]0x968f)+([char]0x5b88)+([char]0x62a4)+([char]0xff01)) "Yellow"
+    Write-Msg ("  [*] "+([char]0x5237)+([char]0x65b0)+([char]0x754c)+([char]0x9762)+" (Ctrl+R) "+([char]0x6216)+([char]0x91cd)+([char]0x542f)+" Antigravity "+([char]0x5373)+([char]0x53ef)+([char]0x67e5)+([char]0x770b)+([char]0x5b8c)+([char]0x6574)+([char]0x6c49)+([char]0x5316)+([char]0x3002)) "Green"
     Write-Msg "==========================================================" "Cyan"
 }
 

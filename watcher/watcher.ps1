@@ -1,4 +1,4 @@
-﻿param(
+param(
     [Parameter(Mandatory=$false)][switch]$RegisterTask,
     [Parameter(Mandatory=$false)][switch]$UnregisterTask,
     [Parameter(Mandatory=$false)][switch]$InstallDaemon,
