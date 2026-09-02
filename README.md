@@ -128,7 +128,21 @@ Windows 用户可以直接双击仓库中的 `安装汉化补丁.bat` 或运行 
 ## 🌐 多源 CDN 瀑布流加速 | Multi-CDN Waterfall Acceleration
 
 国内与海外用户均可享受极速下载：
-`[1. jsDelivr Fastly CDN]` $ightarrow$ `[2. cdnjs Cloudflare CDN]` $ightarrow$ `[3. Ghfast 镜像源]` $ightarrow$ `[4. GitHub 官方源]`
+`[1. jsDelivr Fastly CDN]` -> `[2. cdnjs Cloudflare CDN]` -> `[3. Ghfast 镜像源]` -> `[4. GitHub 官方源]`
+
+---
+
+## 📈 Star History
+
+<p align="center">
+  <a href="https://star-history.com/#good9527/Antigravity-Chinese-Patch&Date">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=good9527/Antigravity-Chinese-Patch&type=Date&theme=dark" />
+      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=good9527/Antigravity-Chinese-Patch&type=Date" />
+      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=good9527/Antigravity-Chinese-Patch&type=Date" width="100%" />
+    </picture>
+  </a>
+</p>
 
 ---
 
