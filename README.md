@@ -50,111 +50,18 @@ curl -fsSL https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@mai
 
 ---
 
-## 🌟 核心特性 | Features
-
-### 🇨🇳 100% 深度汉化与智能模板推理
-- **近 600 条精准核心词典**：完整覆盖侧边栏、设置中心（常规、应用、外观、模型列表、自定义功能、快捷键）、任务窗格、产物面板与通知弹窗。
-- **智能模板模式推理（Dynamic Template Reasoning）**：自动泛化匹配未收录的未来官方新功能（如 `Learn more about {X}` $
-ightarrow$ `了解关于 {X} 的更多信息`，`Open {X} Preferences` $
-ightarrow$ `打开 {X} 偏好设置`）。
-- **动态状态秒级同步**：完美匹配实时思考计时器（`Thinking for 1.2s` $
-ightarrow$ `思考中 (1.2秒)`）、相对时间戳（`10d` $
-ightarrow$ `10天前`，`5m` $
-ightarrow$ `5分钟前`）与任务计数（`Subagents 2` $
-ightarrow$ `子智能体 2`）。
-- **根级监听 + 持续微扫描**：监听 `document.documentElement` 并配合 1.5s 轻量微扫描，即使 React 虚拟 DOM 异步重绘或按 `Ctrl+R` 刷新，界面也**始终保持中文，绝不回退**。
-
-### ⚡ 纯原生零依赖内存注入 | Zero-Dependency Native Engine
-- **Windows 端无需安装 Node.js / Python / Git**：直接利用系统内置的 C# / .NET 动态编译引擎进行内存级 ASAR 重构，**50 毫秒极速热注入**。
-- **macOS / Linux 开箱即用**：利用系统内置 Python 3 原生流式 ASAR 解析器，不依赖任何第三方 pip 包。
-- **纯 7-bit ASCII Unicode 逃逸**：彻底免疫 Windows GBK/CP936 代码页干扰，100% 杜绝乱码。
-
----
-
-## 🏛️ 三级持久化自愈架构 | 3-Tier Persistence Architecture
-
-```
-+---------------------------------------------------------------------------------------------------+
-|                                  ANTIGRAVITY CHINESE PATCH ARCHITECTURE                           |
-+---------------------------------------------------------------------------------------------------+
-                                                  |
-           +--------------------------------------+--------------------------------------+
-           |                                      |                                      |
-           v                                      v                                      v
-+-----------------------+              +-----------------------+              +-----------------------+
-|  Tier A: FS WATCHER   |              |  Tier B: LAUNCH HOOK  |              |  Tier C: IN-PLACE     |
-|     DAEMON SERVICE    |              |   STARTUP RESOLVER    |              |   ASAR PRELOAD STUB   |
-+-----------------------+              +-----------------------+              +-----------------------+
-| - Win: FileWatcher    |              | - Offline Local Cache |              | - Zero Lock Injection |
-|   & Scheduled Task    |              |   (%APPDATA%/...)     |              | - Pure ASCII Escapes  |
-| - Mac: launchd plist  |              | - CDN 4-Tier Fallback |              | - Sub-50ms Hot Patch  |
-| - Lin: systemd unit   |              | - Version-Agnostic    |              | - ContextBridge Safe  |
-| - Sub-50ms Auto-Heal  |              | - Instant Recovery    |              | - Shadow DOM Traversal|
-+-----------------------+              +-----------------------+              +-----------------------+
-```
-
----
-
-## 🎛️ 本地控制台管理面板 | Interactive Console Menu
-
-Windows 用户可以直接双击仓库中的 `安装汉化补丁.bat` 或运行 `patch_antigravity.ps1`，呼出管理菜单：
-
-```text
-======================================================================
-          Antigravity 中文汉化管理面板 (Elite Toolkit)
-          永久自愈 · 零依赖原生注入 · 跨版本无损热补丁
-======================================================================
-
-  [1] 一键安装 / 更新汉化补丁 (In-place Hot Patch)
-  [2] 运行环境与健康状态诊断 (Health Diagnostics)
-  [3] 开启 / 关闭后台自动守护 (Toggle Auto-Heal Daemon)
-  [4] 一键恢复官方原版备份 (One-Click Rollback)
-  [5] 退出 (Exit)
-
-======================================================================
-请输入选项 [1-5]:
-```
-
----
-
-## ⚙️ CLI 命令行参数与自动化 | CLI Flags & Automation
-
-| 参数 / Flag | 缩写 | 说明 / Description |
-|---|---|---|
-| `--install` | `-i` | 执行一键注入安装，创建备份并激活自愈守护 |
-| `--uninstall` | `-u` | 还原官方原版备份，清理离线缓存并注销守护服务 |
-| `--check` | `-c` | 执行环境与健康状态诊断（退出码 0 表示健康，1 表示异常） |
-| `--restore` | `-r` | 从 `app.asar.bak` 一键还原官方原版 |
-| `--daemon <enable\|disable\|status>` | - | 配置后台自愈守护进程状态 |
-| `--quiet` / `--silent` | `-q` | 静默模式，无控制台交互输出 |
-| `--json` | - | 输出标准 JSON 格式诊断数据 |
-
----
-
-## 🌐 多源 CDN 瀑布流加速 | Multi-CDN Waterfall Acceleration
-
-国内与海外用户均可享受极速下载：
-`[1. jsDelivr Fastly CDN]` -> `[2. cdnjs Cloudflare CDN]` -> `[3. Ghfast 镜像源]` -> `[4. GitHub 官方源]`
-
----
-
-## 🌟 支持项目 | Give a Star
-
-如果本项目对你有帮助，欢迎点击右上角的 ⭐ Star 支持！
+## 📈 Star History
 
 <p align="center">
-  <a href="https://github.com/good9527/Antigravity-Chinese-Patch/stargazers">
-    <img src="https://img.shields.io/github/stars/good9527/Antigravity-Chinese-Patch?style=for-the-badge&amp;logo=github&amp;color=gold&amp;label=GitHub%20Stars" alt="GitHub Stars">
-  </a>
-  <a href="https://github.com/good9527/Antigravity-Chinese-Patch/issues">
-    <img src="https://img.shields.io/github/issues/good9527/Antigravity-Chinese-Patch?style=for-the-badge&amp;color=blue&amp;label=Issues" alt="Issues">
-  </a>
-  <a href="https://github.com/good9527/Antigravity-Chinese-Patch/releases">
-    <img src="https://img.shields.io/github/v/release/good9527/Antigravity-Chinese-Patch?style=for-the-badge&amp;color=green&amp;label=Latest%20Release" alt="Latest Release">
+  <a href="https://star-history.com/#good9527/Antigravity-Chinese-Patch&Date">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/.github/assets/star-history-dark.svg" />
+      <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/.github/assets/star-history-light.svg" />
+      <img alt="Star History Chart" src="https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/.github/assets/star-history-dark.svg" width="100%" />
+    </picture>
   </a>
 </p>
 
----
 
 ## 🔍 搜索引擎与 AI 检索关键词 | Search Index & Tags
 
