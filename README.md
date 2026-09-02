@@ -54,8 +54,14 @@ curl -fsSL https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@mai
 
 ### 🇨🇳 100% 深度汉化与智能模板推理
 - **近 600 条精准核心词典**：完整覆盖侧边栏、设置中心（常规、应用、外观、模型列表、自定义功能、快捷键）、任务窗格、产物面板与通知弹窗。
-- **智能模板模式推理（Dynamic Template Reasoning）**：自动泛化匹配未收录的未来官方新功能（如 `Learn more about {X}` $ightarrow$ `了解关于 {X} 的更多信息`，`Open {X} Preferences` $ightarrow$ `打开 {X} 偏好设置`）。
-- **动态状态秒级同步**：完美匹配实时思考计时器（`Thinking for 1.2s` $ightarrow$ `思考中 (1.2秒)`）、相对时间戳（`10d` $ightarrow$ `10天前`，`5m` $ightarrow$ `5分钟前`）与任务计数（`Subagents 2` $ightarrow$ `子智能体 2`）。
+- **智能模板模式推理（Dynamic Template Reasoning）**：自动泛化匹配未收录的未来官方新功能（如 `Learn more about {X}` $
+ightarrow$ `了解关于 {X} 的更多信息`，`Open {X} Preferences` $
+ightarrow$ `打开 {X} 偏好设置`）。
+- **动态状态秒级同步**：完美匹配实时思考计时器（`Thinking for 1.2s` $
+ightarrow$ `思考中 (1.2秒)`）、相对时间戳（`10d` $
+ightarrow$ `10天前`，`5m` $
+ightarrow$ `5分钟前`）与任务计数（`Subagents 2` $
+ightarrow$ `子智能体 2`）。
 - **根级监听 + 持续微扫描**：监听 `document.documentElement` 并配合 1.5s 轻量微扫描，即使 React 虚拟 DOM 异步重绘或按 `Ctrl+R` 刷新，界面也**始终保持中文，绝不回退**。
 
 ### ⚡ 纯原生零依赖内存注入 | Zero-Dependency Native Engine
@@ -132,15 +138,19 @@ Windows 用户可以直接双击仓库中的 `安装汉化补丁.bat` 或运行 
 
 ---
 
-## 📈 Star History
+## 🌟 支持项目 | Give a Star
+
+如果本项目对你有帮助，欢迎点击右上角的 ⭐ Star 支持！
 
 <p align="center">
-  <a href="https://star-history.com/#good9527/Antigravity-Chinese-Patch&Date">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=good9527/Antigravity-Chinese-Patch&type=Date&theme=dark" />
-      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=good9527/Antigravity-Chinese-Patch&type=Date" />
-      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=good9527/Antigravity-Chinese-Patch&type=Date" width="100%" />
-    </picture>
+  <a href="https://github.com/good9527/Antigravity-Chinese-Patch/stargazers">
+    <img src="https://img.shields.io/github/stars/good9527/Antigravity-Chinese-Patch?style=for-the-badge&amp;logo=github&amp;color=gold&amp;label=GitHub%20Stars" alt="GitHub Stars">
+  </a>
+  <a href="https://github.com/good9527/Antigravity-Chinese-Patch/issues">
+    <img src="https://img.shields.io/github/issues/good9527/Antigravity-Chinese-Patch?style=for-the-badge&amp;color=blue&amp;label=Issues" alt="Issues">
+  </a>
+  <a href="https://github.com/good9527/Antigravity-Chinese-Patch/releases">
+    <img src="https://img.shields.io/github/v/release/good9527/Antigravity-Chinese-Patch?style=for-the-badge&amp;color=green&amp;label=Latest%20Release" alt="Latest Release">
   </a>
 </p>
 
