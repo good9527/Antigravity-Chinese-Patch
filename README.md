@@ -1,4 +1,5 @@
-# Antigravity-Chinese-Patch (Google Antigravity 全平台通用中文汉化补丁)
+# Antigravity 汉化补丁 / 反重力中文包 (Antigravity-Chinese-Patch)
+> **Google Antigravity 全平台通用深度中文汉化补丁 · 零依赖原生热注入 · 官方升级永久自愈守护**
 
 <p align="center">
   <a href="https://github.com/good9527/Antigravity-Chinese-Patch">
