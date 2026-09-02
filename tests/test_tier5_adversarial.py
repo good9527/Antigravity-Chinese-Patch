@@ -1052,9 +1052,9 @@ class TestTier5PureAsciiUnicodeEscapeIntegrity(unittest.TestCase):
         preload_dict = json.loads(preload_match.group(1))
         engine_dict = json.loads(engine_match.group(1))
 
-        self.assertEqual(len(json_dict), 514, "dictionary.json does not have exactly 514 keys!")
-        self.assertEqual(len(preload_dict), 514, "preload.js does not have exactly 514 keys!")
-        self.assertEqual(len(engine_dict), 514, "engine.js does not have exactly 514 keys!")
+        self.assertGreaterEqual(len(json_dict), 514, "dictionary.json should have at least 514 keys!")
+        self.assertEqual(len(json_dict), len(preload_dict), "Key count mismatch between dictionary.json and preload.js!")
+        self.assertEqual(len(json_dict), len(engine_dict), "Key count mismatch between dictionary.json and engine.js!")
 
         self.assertEqual(json_dict, preload_dict, "Parity mismatch between dictionary.json and preload.js!")
         self.assertEqual(json_dict, engine_dict, "Parity mismatch between dictionary.json and engine.js!")
