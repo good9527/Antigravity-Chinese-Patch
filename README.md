@@ -11,6 +11,12 @@
   </a>
 </p>
 
+> [!TIP]
+> 🔗 **开源生态矩阵联动**：
+> 如果你同时在日常开发中使用 Anthropic Claude 桌面客户端，欢迎体验我们的姐妹项目：
+> 👉 [**good9527/Claude-Desktop-Chinese** (Claude Desktop 全平台通用中文汉化补丁 · 22,000+ 词条全量覆盖 · 官方升级永久自愈守护)](https://github.com/good9527/Claude-Desktop-Chinese)
+
+
 这是一个针对 Google 出品的强大智能体编码助手 **Google Antigravity (谷歌反重力)** 客户端的开源、零依赖、永久自愈的通用中文汉化补丁系统与动态 DOM 扫描引擎。
 
 This is an open-source, zero-dependency, permanent self-healing Chinese localization patch and dynamic DOM scanning engine for **Google Antigravity** (Windows, macOS, and Linux).

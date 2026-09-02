@@ -1,0 +1,50 @@
+name: CI — Validate & Test Suite
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-windows:
+    name: Test Suite (Windows)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run 5-Tier Test Suite (103 Tests)
+        shell: pwsh
+        run: python tests/test_runner.py
+
+  test-unix:
+    name: Validation (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify Dictionary & Engine Syntax
+        run: |
+          python3 -c "
+          import json, os
+          with open('dist/dictionary.json', 'r', encoding='utf-8') as f: d = json.load(f)
+          assert len(d) >= 500, 'Dictionary too small'
+          assert os.path.exists('dist/preload.js'), 'preload.js missing'
+          assert os.path.exists('install.sh'), 'install.sh missing'
+          print('All checks passed!')
+          "
