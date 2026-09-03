@@ -645,7 +645,43 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
   "Presence Penalty": "\u5b58\u5728\u60e9\u7f5a",
   "System Prompt": "\u7cfb\u7edf\u63d0\u793a\u8bcd",
   "System Instructions": "\u7cfb\u7edf\u6307\u4ee4",
-  "User Prompt": "\u7528\u6237\u63d0\u793a\u8bcd"
+  "User Prompt": "\u7528\u6237\u63d0\u793a\u8bcd",
+
+    "Weekly Limit Remaining": "\u6bcf\u5468\u5269\u4f59\u989d\u5ea6",
+    "Five Hour Limit Remaining": "5\u5c0f\u65f6\u5269\u4f59\u989d\u5ea6",
+    "Gemini Models": "Gemini \u6a21\u578b",
+    "Claude and GPT models": "Claude \u4e0e GPT \u6a21\u578b",
+    "View Usage": "\u67e5\u770b\u989d\u5ea6\u7528\u91cf",
+    "Models & Usage": "\u6a21\u578b\u4e0e\u7528\u91cf",
+    "Manage your model quota and credits.": "\u7ba1\u7406\u60a8\u7684\u6a21\u578b\u914d\u989d\u4e0e\u70b9\u6570\u3002",
+    "Plan": "\u5957\u9910\u8ba1\u5212",
+    "Your Plan: Free": "\u5f53\u524d\u5957\u9910\uff1a\u514d\u8d39\u7248",
+    "You can upgrade to a Google AI Ultra plan to receive higher rate limits.": "\u5347\u7ea7\u81f3 Google AI Ultra \u5957\u9910\u53ef\u83b7\u53d6\u66f4\u9ad8\u7684\u901f\u7387\u4e0a\u9650\u3002",
+    "Upgrade": "\u5347\u7ea7\u5957\u9910",
+    "When toggled on, Antigravity will use your AI credits to fulfill model requests once you're out of model quota. Antigravity will always use your model quota first before using AI credits.": "\u5f00\u542f\u540e\uff0c\u5f53\u6a21\u578b\u914d\u989d\u7528\u5c3d\u65f6\uff0cAntigravity \u5c06\u4f7f\u7528\u60a8\u7684 AI \u70b9\u6570\u7ee7\u7eed\u54cd\u5e94\u6a21\u578b\u8bf7\u6c42\u3002\u5728\u6d88\u8017\u70b9\u6570\u524d\uff0c\u7cfb\u7edf\u59cb\u7ec8\u4f18\u5148\u4f7f\u7528\u6a21\u578b\u914d\u989d\u3002",
+    "Model": "\u6a21\u578b",
+    "Controls the actions the agent can take.": "\u63a7\u5236\u667a\u80fd\u4f53\u53ef\u6267\u884c\u7684\u64cd\u4f5c\u3002",
+    "Tool Permissions": "\u5de5\u5177\u6743\u9650",
+    "Modify permissions for file, terminal, and MCP tools.": "\u4fee\u6539\u6587\u4ef6\u3001\u7ec8\u7aef\u4e0e MCP \u5de5\u5177\u7684\u8bbf\u95ee\u6743\u9650\u3002",
+    "Whether the agent asks you to review its documents.": "\u667a\u80fd\u4f53\u662f\u5426\u8981\u6c42\u60a8\u5ba1\u6838\u5176\u751f\u6210\u7684\u4ea7\u7269\u6587\u6863\u3002",
+    "Terminal & Tooling Permissions": "\u7ec8\u7aef\u4e0e\u5de5\u5177\u6743\u9650",
+    "Configure allowed commands outside the sandbox.": "\u914d\u7f6e\u6c99\u7bb1\u5916\u5141\u8bb8\u6267\u884c\u7684\u547d\u4ee4\u3002",
+    "allowed commands outside the sandbox.": "\u6c99\u7bb1\u5916\u5141\u8bb8\u6267\u884c\u7684\u547d\u4ee4\u3002",
+    "Configure the browser subagent. It requires Google Chrome to be installed. The browser subagent can be invoked by typing /browser in the conversation input box.": "\u914d\u7f6e\u6d4f\u89c8\u5668\u5b50\u667a\u80fd\u4f53\u3002\u6b64\u529f\u80fd\u9700\u8981\u5b89\u88c5 Google Chrome\u3002\u53ef\u4ee5\u5728\u5bf9\u8bdd\u8f93\u5165\u6846\u4e2d\u8f93\u5165 /browser \u6765\u8c03\u7528\u6d4f\u89c8\u5668\u667a\u80fd\u4f53\u3002",
+    "Controls whether the agent can run custom JavaScript to automate complex browser actions.": "\u63a7\u5236\u667a\u80fd\u4f53\u662f\u5426\u53ef\u4ee5\u8fd0\u884c\u81ea\u5b9a\u4e49 JavaScript \u6765\u6267\u884c\u590d\u6742\u7684\u81ea\u52a8\u5316\u6d4f\u89c8\u5668\u64cd\u4f5c\u3002",
+    "Configure allowed and denied URLs for browser actuation.": "\u914d\u7f6e\u5141\u8bb8\u548c\u7981\u6b62\u6d4f\u89c8\u5668\u8fdb\u884c\u81ea\u4e3b\u64cd\u4f5c\u4ea4\u4e92\u7684 URL \u89c4\u5219\u3002",
+    "allowed and denied URLs for browser actuation.": "\u5141\u8bb8\u548c\u7981\u6b62\u6d4f\u89c8\u5668\u8fdb\u884c\u81ea\u4e3b\u64cd\u4f5c\u4ea4\u4e92\u7684 URL \u89c4\u5219\u3002",
+    "Manage your plan, credentials, and general preferences.": "\u7ba1\u7406\u60a8\u7684\u5957\u9910\u8ba1\u5212\u3001\u51ed\u636e\u4ee5\u53ca\u5e38\u89c4\u504f\u597d\u8bbe\u7f6e\u3002",
+    "Enable Telemetry": "\u542f\u7528\u9065\u6d4b\u6570\u636e\u6536\u96c6",
+    "When toggled on, Antigravity collects usage data to help Google enhance performance and features.": "\u5f00\u542f\u540e\uff0cAntigravity \u5c06\u6536\u96c6\u4f7f\u7528\u6570\u636e\uff0c\u4ee5\u534f\u52a9 Google \u4f18\u5316\u8f6f\u4ef6\u6027\u80fd\u4e0e\u4ea7\u54c1\u529f\u80fd\u3002",
+    "Marketing Emails": "\u4ea7\u54c1\u8425\u9500\u90ae\u4ef6",
+    "Receive product updates, tips, and promotions from Google Antigravity via email.": "\u901a\u8fc7\u7535\u5b50\u90ae\u4ef6\u63a5\u6536\u6765\u81ea Google Antigravity \u7684\u6700\u65b0\u4ea7\u54c1\u52a8\u6001\u3001\u4f7f\u7528\u6280\u5de7\u53ca\u4f18\u60e0\u4fe1\u606f\u3002",
+    "Sign Out": "\u9000\u51fa\u767b\u5f55",
+    "By using this app, you agree to its": "\u4f7f\u7528\u672c\u5e94\u7528\u5373\u8868\u793a\u60a8\u540c\u610f\u5176",
+    "Browser settings have moved": "\u6d4f\u89c8\u5668\u8bbe\u7f6e\u5df2\u8fc1\u79fb",
+    "Browser settings have moved to the Browser section of General settings. Go to General settings": "\u6d4f\u89c8\u5668\u8bbe\u7f6e\u73b0\u5df2\u8fc1\u79fb\u81f3\u201c\u5e38\u89c4\u8bbe\u7f6e\u201d\u4e2d\u7684\u201c\u6d4f\u89c8\u5668\u201d\u533a\u57df\u3002\u524d\u5f80\u5e38\u89c4\u8bbe\u7f6e",
+    "Browser settings have moved to the Browser section of General settings.": "\u6d4f\u89c8\u5668\u8bbe\u7f6e\u73b0\u5df2\u8fc1\u79fb\u81f3\u201c\u5e38\u89c4\u8bbe\u7f6e\u201d\u4e2d\u7684\u201c\u6d4f\u89c8\u5668\u201d\u533a\u57df\u3002",
+    "Go to General settings": "\u524d\u5f80\u5e38\u89c4\u8bbe\u7f6e"
 };
 
   // 2. Exact Phrase / Dynamic Templates
@@ -653,10 +689,10 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     { regex: /^Learn\s+more\s+about\s+(.+)$/i, format: (m) => `\u4e86\u89e3\u5173\u4e8e ${m[1]} \u7684\u66f4\u591a\u4fe1\u606f` },
     { regex: /^Open\s+(.+)\s+Preferences$/i, format: (m) => `\u6253\u5f00 ${m[1]} \u504f\u597d\u8bbe\u7f6e` },
     { regex: /^Open\s+(.+)\s+Settings$/i, format: (m) => `\u6253\u5f00 ${m[1]} \u8bbe\u7f6e` },
-    { regex: /^Configure\s+(.+)$/i, format: (m) => `\u914d\u7f6e ${m[1]}` },
-    { regex: /^Manage\s+(.+)$/i, format: (m) => `\u7ba1\u7406 ${m[1]}` },
-    { regex: /^Enable\s+(.+)$/i, format: (m) => `\u542f\u7528 ${m[1]}` },
-    { regex: /^Disable\s+(.+)$/i, format: (m) => `\u7981\u7528 ${m[1]}` },
+    ` },
+    ` },
+    ` },
+    ` },
     { regex: /^Choose\s+a\s+predefined\s+(.+)\s+for\s+the\s+agent\.(.*)$/i, format: (m) => `\u4e3a\u667a\u80fd\u4f53\u9009\u62e9\u9884\u8bbe\u7684 ${m[1]}\u3002${m[2]}` },
     { regex: /^Scan\s+the\s+code\s+to\s+(.+)$/i, format: (m) => `\u626b\u63cf\u4e8c\u7ef4\u7801\u4ee5 ${m[1]}` }
   ];
@@ -740,6 +776,32 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
   ].join(', ');
 
   // Helper: Normalize non-breaking space
+  // Helper: Format quota refresh duration
+  function formatQuotaDuration(durStr) {
+    if (!durStr) return '';
+    const res = durStr.trim().replace(/\.$/, '');
+    let dm;
+    if ((dm = res.match(/^(\d+)\s+days?,\s*(\d+)\s+hours?$/i))) {
+      return `${dm[1]} \u5929 ${dm[2]} \u5c0f\u65f6`;
+    }
+    if ((dm = res.match(/^(\d+)\s+hours?,\s*(\d+)\s+minutes?$/i))) {
+      return `${dm[1]} \u5c0f\u65f6 ${dm[2]} \u5206\u949f`;
+    }
+    if ((dm = res.match(/^(\d+)\s+days?$/i))) {
+      return `${dm[1]} \u5929`;
+    }
+    if ((dm = res.match(/^(\d+)\s+hours?$/i))) {
+      return `${dm[1]} \u5c0f\u65f6`;
+    }
+    if ((dm = res.match(/^(\d+)\s+minutes?$/i))) {
+      return `${dm[1]} \u5206\u949f`;
+    }
+    if ((dm = res.match(/^(\d+)\s+seconds?$/i))) {
+      return `${dm[1]} \u79d2`;
+    }
+    return res;
+  }
+
   function normalize(str) {
     if (!str) return '';
     return str.replace(/\u00a0/g, ' ');
@@ -864,6 +926,44 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
       if ((m = trimmed.match(tmpl.regex))) {
         return tmpl.format(m);
       }
+    }
+
+    // Rule 19: Quota Limit Refresh Timer (Full & Truncated Sentence Parser)
+    if ((m = trimmed.match(/^You have (?:used\s+(some|all)|reached)\s+(?:of\s+)?your\s+(weekly|5-hour|daily)\s+limit,\s*it will fully refresh in\s+(.+?)\.?$/i))) {
+      const usageType = (m[1] && m[1].toLowerCase() === 'all') ? '\u5168\u90e8' : '\u90e8\u5206';
+      const limitMap = { 'weekly': '\u6bcf\u5468', '5-hour': '5\u5c0f\u65f6', 'daily': '\u6bcf\u65e5' };
+      const limitName = limitMap[m[2].toLowerCase()] || m[2];
+      const dur = formatQuotaDuration(m[3]);
+      return `\u5df2\u4f7f\u7528${usageType}${limitName}\u989d\u5ea6\uff0c\u5c06\u5728 ${dur} \u540e\u5b8c\u5168\u91cd\u7f6e\u3002`;
+    }
+    if ((m = trimmed.match(/^it will fully refresh in\s+(.+?)\.?$/i))) {
+      const dur = formatQuotaDuration(m[1]);
+      return `\u5c06\u5728 ${dur} \u540e\u5b8c\u5168\u91cd\u7f6e`;
+    }
+    if ((m = trimmed.match(/^You have (?:used\s+(some|all)|reached)\s+(?:of\s+)?your\s+(weekly|5-hour|daily)\s+limit\.?$/i))) {
+      const usageType = (m[1] && m[1].toLowerCase() === 'all') ? '\u5168\u90e8' : '\u90e8\u5206';
+      const limitMap = { 'weekly': '\u6bcf\u5468', '5-hour': '5\u5c0f\u65f6', 'daily': '\u6bcf\u65e5' };
+      const limitName = limitMap[m[2].toLowerCase()] || m[2];
+      return `\u5df2\u4f7f\u7528${usageType}${limitName}\u989d\u5ea6`;
+    }
+
+    // Rule 20: Plan descriptions
+    if ((m = trimmed.match(/^Your Plan:\s*(.+)$/i))) {
+      return `\u5f53\u524d\u5957\u9910\uff1a${m[1].trim()}`;
+    }
+
+    // Rule 21: Settings Modified in N projects & Learn more
+    if ((m = trimmed.match(/^Controls the actions the agent can take\.\s*Modified in\s+(\d+)\s+projects?$/i))) {
+      return `\u63a7\u5236\u667a\u80fd\u4f53\u53ef\u6267\u884c\u7684\u64cd\u4f5c\u3002\u5df2\u5728 ${m[1]} \u4e2a\u9879\u76ee\u4e2d\u4fee\u6539`;
+    }
+    if ((m = trimmed.match(/^Whether the agent asks you to review its documents\.\s*Modified in\s+(\d+)\s+projects?$/i))) {
+      return `\u667a\u80fd\u4f53\u662f\u5426\u8981\u6c42\u60a8\u5ba1\u6838\u5176\u751f\u6210\u7684\u4ea7\u7269\u6587\u6863\u3002\u5df2\u5728 ${m[1]} \u4e2a\u9879\u76ee\u4e2d\u4fee\u6539`;
+    }
+    if ((m = trimmed.match(/^Modified in\s+(\d+)\s+projects?$/i))) {
+      return `\u5df2\u5728 ${m[1]} \u4e2a\u9879\u76ee\u4e2d\u4fee\u6539`;
+    }
+    if ((m = trimmed.match(/^Learn\s+more\s+about\s+(.+)$/i))) {
+      return `\u4e86\u89e3\u66f4\u591a\u5173\u4e8e ${m[1]}`;
     }
 
     return null;
