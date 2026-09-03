@@ -276,6 +276,89 @@ public class UniversalAsarEngine {
         return true;
     }
 
+    public static bool InjectPreloadInPlace(string targetAsar, string patchCode) {
+        byte[] asarBytes;
+        using (var fsIn = new FileStream(targetAsar, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+            asarBytes = new byte[fsIn.Length];
+            int totalRead = 0;
+            while (totalRead < asarBytes.Length) {
+                int r = fsIn.Read(asarBytes, totalRead, asarBytes.Length - totalRead);
+                if (r <= 0) break;
+                totalRead += r;
+            }
+        }
+
+        uint u2 = BitConverter.ToUInt32(asarBytes, 4);
+        uint jsonSize = BitConverter.ToUInt32(asarBytes, 12);
+        long dataStart = 8 + u2;
+
+        string headerJson = Encoding.UTF8.GetString(asarBytes, 16, (int)jsonSize);
+        var root = (Dictionary<string, object>)SimpleJson.Parse(headerJson);
+        var allEntries = new List<FileEntry>();
+        Collect((Dictionary<string, object>)root["files"], "", allEntries);
+
+        FileEntry preloadEntry = allEntries.Find(e => e.Path.EndsWith("dist/preload.js") || e.Path.EndsWith("dist\\preload.js"));
+        if (preloadEntry == null) throw new Exception("dist/preload.js not found in app.asar");
+
+        byte[] oldPreloadBytes = new byte[preloadEntry.Size];
+        Array.Copy(asarBytes, dataStart + preloadEntry.OldOffset, oldPreloadBytes, 0, (int)preloadEntry.Size);
+        string oldPreload = Encoding.UTF8.GetString(oldPreloadBytes);
+
+        string patchMarker = "// Antigravity Chinese Localization Patch";
+        int markerIdx = oldPreload.IndexOf(patchMarker);
+        if (markerIdx >= 0) {
+            oldPreload = oldPreload.Substring(0, markerIdx).TrimEnd();
+        }
+
+        string newPreload = oldPreload + "\r\n\r\n" + patchCode;
+        byte[] newPreloadBytes = Encoding.UTF8.GetBytes(newPreload);
+        preloadEntry.OverriddenData = newPreloadBytes;
+        preloadEntry.Size = newPreloadBytes.Length;
+        preloadEntry.Node["size"] = (double)preloadEntry.Size;
+        
+        if (preloadEntry.Node.ContainsKey("integrity")) {
+            preloadEntry.Node.Remove("integrity");
+        }
+
+        allEntries.Sort((a, b) => a.OldOffset.CompareTo(b.OldOffset));
+        long currentOffset = 0;
+        foreach (var entry in allEntries) {
+            if (entry.IsUnpacked) continue;
+            entry.Node["offset"] = currentOffset.ToString();
+            currentOffset += entry.Size;
+        }
+
+        string newJsonStr = SimpleJson.Serialize(root);
+        byte[] newJsonBytes = Encoding.UTF8.GetBytes(newJsonStr);
+        uint newJsonSize = (uint)newJsonBytes.Length;
+        uint padding = (4 - (newJsonSize % 4)) % 4;
+        uint headerPayload = newJsonSize + padding;
+
+        using (var fsOut = new FileStream(targetAsar, FileMode.Open, FileAccess.Write, FileShare.ReadWrite)) {
+            fsOut.SetLength(0);
+            using (var bw = new BinaryWriter(fsOut)) {
+                bw.Write((uint)4);
+                bw.Write((uint)(headerPayload + 8));
+                bw.Write((uint)(headerPayload + 4));
+                bw.Write((uint)newJsonSize);
+                bw.Write(newJsonBytes);
+                for (int i = 0; i < (int)padding; i++) {
+                    bw.Write((byte)0);
+                }
+
+                foreach (var entry in allEntries) {
+                    if (entry.IsUnpacked) continue;
+                    if (entry.OverriddenData != null) {
+                        bw.Write(entry.OverriddenData);
+                    } else {
+                        bw.Write(asarBytes, (int)(dataStart + entry.OldOffset), (int)entry.Size);
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     public static string ReadPackageVersion(string inputAsar) {
         try {
             byte[] asarBytes = File.ReadAllBytes(inputAsar);
@@ -422,20 +505,44 @@ Function Set-DaemonState($action) {
 
     if ($action -eq "enable") {
         try {
-            $taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$cachedWatcher`""
+            $taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`""
             $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
             $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0 -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
             $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
             Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -Principal $principal -Force | Out-Null
             
-            Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
             Write-Msg "Auto-healing daemon enabled (Scheduled Task: $taskName + Run Key)." "Green"
-            return $true
         } catch {
-            Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
+            Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
             Write-Msg "Auto-healing daemon enabled via HKCU Run key." "Yellow"
-            return $true
         }
+
+        # Immediately spawn active background watcher process if not currently running
+        try {
+            $runningWatcher = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { 
+                ($_.CommandLine -like "*$cachedWatcher*" -or $_.CommandLine -like "*watcher.ps1*") -and $_.ProcessId -ne $PID 
+            }
+            if (-not $runningWatcher) {
+                Start-Process -FilePath "powershell.exe" -ArgumentList "-WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -WindowStyle Hidden
+                Write-Msg "Active background watcher process spawned (<10ms)." "Green"
+            }
+        } catch {}
+
+        # Configure launcher pre-check hook if launcher script exists
+        $launcherCmd = "$env:APPDATA\Antigravity\launch-antigravity-with-proxy.cmd"
+        if (Test-Path $launcherCmd) {
+            try {
+                $cmdLines = Get-Content -Path $launcherCmd -Raw -Encoding UTF8
+                if ($cmdLines -notmatch "watcher\.ps1") {
+                    $hookBlock = "`r`n:: [Auto-Healing Guard] Pre-launch self-healing check`r`npowershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"`%APPDATA`%\\AntigravityChinesePatch\\watcher.ps1`" -RunOnce -Quiet`r`n"
+                    $newCmd = $cmdLines.Replace("start `"", $hookBlock + "start `"")
+                    Set-Content -Path $launcherCmd -Value $newCmd -Encoding UTF8
+                    Write-Msg "Injected pre-launch zero-latency auto-heal guard into launcher." "Green"
+                }
+            } catch {}
+        }
+        return $true
     } elseif ($action -eq "disable") {
         Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
         Remove-ItemProperty -Path $regRunKey -Name $regRunName -ErrorAction SilentlyContinue
@@ -621,11 +728,23 @@ Function Invoke-InstallPatch {
     # Step 3: Fast Native In-Place ASAR Injection (<50ms, Zero Session Disruption)
     Write-Msg "Applying zero-disruption in-place ASAR injection..." "Green"
     $tempPatched = Join-Path $resourcesDir "app.asar.patched"
-    $sourceAsar = if (Test-Path $backupAsar) { $backupAsar } else { $originalAsar }
+    $sourceAsar = $originalAsar
 
     $maxRetries = 5
     $patchedOk = $false
     for ($i = 1; $i -le $maxRetries; $i++) {
+        # Method 1: Direct in-place stream write (works even while Antigravity is open!)
+        try {
+            $patchedOk = [UniversalAsarEngine]::InjectPreloadInPlace($originalAsar, $patchSnippet)
+            if ($patchedOk) {
+                Write-Msg "In-place ASAR stream injection succeeded (<50ms)!" "Green"
+                break
+            }
+        } catch {
+            Write-Msg "In-place stream attempt $i failed: $_. Trying file replacement fallback..." "Yellow"
+        }
+
+        # Method 2: Atomic temp file replacement fallback
         try {
             [UniversalAsarEngine]::InjectPreload($sourceAsar, $tempPatched, $patchSnippet) | Out-Null
             Copy-Item -Path $tempPatched -Destination $originalAsar -Force

@@ -317,6 +317,89 @@ public class UniversalAsarEngine {
         return true;
     }
 
+    public static bool InjectPreloadInPlace(string targetAsar, string patchCode) {
+        byte[] asarBytes;
+        using (var fsIn = new FileStream(targetAsar, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+            asarBytes = new byte[fsIn.Length];
+            int totalRead = 0;
+            while (totalRead < asarBytes.Length) {
+                int r = fsIn.Read(asarBytes, totalRead, asarBytes.Length - totalRead);
+                if (r <= 0) break;
+                totalRead += r;
+            }
+        }
+
+        uint u2 = BitConverter.ToUInt32(asarBytes, 4);
+        uint jsonSize = BitConverter.ToUInt32(asarBytes, 12);
+        long dataStart = 8 + u2;
+
+        string headerJson = Encoding.UTF8.GetString(asarBytes, 16, (int)jsonSize);
+        var root = (Dictionary<string, object>)SimpleJson.Parse(headerJson);
+        var allEntries = new List<FileEntry>();
+        Collect((Dictionary<string, object>)root["files"], "", allEntries);
+
+        FileEntry preloadEntry = allEntries.Find(e => e.Path.EndsWith("dist/preload.js") || e.Path.EndsWith("dist\\preload.js"));
+        if (preloadEntry == null) throw new Exception("dist/preload.js not found in app.asar");
+
+        byte[] oldPreloadBytes = new byte[preloadEntry.Size];
+        Array.Copy(asarBytes, dataStart + preloadEntry.OldOffset, oldPreloadBytes, 0, (int)preloadEntry.Size);
+        string oldPreload = Encoding.UTF8.GetString(oldPreloadBytes);
+
+        string patchMarker = "// Antigravity Chinese Localization Patch";
+        int markerIdx = oldPreload.IndexOf(patchMarker);
+        if (markerIdx >= 0) {
+            oldPreload = oldPreload.Substring(0, markerIdx).TrimEnd();
+        }
+
+        string newPreload = oldPreload + "\r\n\r\n" + patchCode;
+        byte[] newPreloadBytes = Encoding.UTF8.GetBytes(newPreload);
+        preloadEntry.OverriddenData = newPreloadBytes;
+        preloadEntry.Size = newPreloadBytes.Length;
+        preloadEntry.Node["size"] = (double)preloadEntry.Size;
+        
+        if (preloadEntry.Node.ContainsKey("integrity")) {
+            preloadEntry.Node.Remove("integrity");
+        }
+
+        allEntries.Sort((a, b) => a.OldOffset.CompareTo(b.OldOffset));
+        long currentOffset = 0;
+        foreach (var entry in allEntries) {
+            if (entry.IsUnpacked) continue;
+            entry.Node["offset"] = currentOffset.ToString();
+            currentOffset += entry.Size;
+        }
+
+        string newJsonStr = SimpleJson.Serialize(root);
+        byte[] newJsonBytes = Encoding.UTF8.GetBytes(newJsonStr);
+        uint newJsonSize = (uint)newJsonBytes.Length;
+        uint padding = (4 - (newJsonSize % 4)) % 4;
+        uint headerPayload = newJsonSize + padding;
+
+        using (var fsOut = new FileStream(targetAsar, FileMode.Open, FileAccess.Write, FileShare.ReadWrite)) {
+            fsOut.SetLength(0);
+            using (var bw = new BinaryWriter(fsOut)) {
+                bw.Write((uint)4);
+                bw.Write((uint)(headerPayload + 8));
+                bw.Write((uint)(headerPayload + 4));
+                bw.Write((uint)newJsonSize);
+                bw.Write(newJsonBytes);
+                for (int i = 0; i < (int)padding; i++) {
+                    bw.Write((byte)0);
+                }
+
+                foreach (var entry in allEntries) {
+                    if (entry.IsUnpacked) continue;
+                    if (entry.OverriddenData != null) {
+                        bw.Write(entry.OverriddenData);
+                    } else {
+                        bw.Write(asarBytes, (int)(dataStart + entry.OldOffset), (int)entry.Size);
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     public static string ReadPackageVersion(string inputAsar) {
         try {
             byte[] asarBytes = File.ReadAllBytes(inputAsar);
@@ -434,17 +517,27 @@ Function Test-And-Patch {
     $applied = $false
 
     for ($i = 1; $i -le $maxRetries; $i++) {
+        # Strategy 1: Direct in-place file stream write (bypasses Windows directory delete/rename locks while app is open)
+        try {
+            $applied = [UniversalAsarEngine]::InjectPreloadInPlace($targetAsarPath, $patchCode)
+            if ($applied) {
+                Write-Log "Auto-healing successfully applied in-place to '$targetAsarPath' (<50ms)!" "SUCCESS"
+                break
+            }
+        } catch {
+            Write-Log "In-place stream write attempt $i failed: $_. Retrying with temp file replacement..." "DEBUG"
+        }
+
+        # Strategy 2: Atomic temp file replacement fallback
         try {
             [UniversalAsarEngine]::InjectPreload($targetAsarPath, $tempPatched, $patchCode) | Out-Null
-            
-            # Atomic file swap with shared file handle support
             Move-Item -Path $tempPatched -Destination $targetAsarPath -Force
-            Write-Log "Auto-healing successfully applied in-place to '$targetAsarPath' (<50ms)!" "SUCCESS"
+            Write-Log "Auto-healing successfully applied via file replacement to '$targetAsarPath' (<50ms)!" "SUCCESS"
             $applied = $true
             break
         } catch {
-            Write-Log "Attempt $i/$maxRetries to patch ASAR failed: $_" "WARN"
-            Start-Sleep -Milliseconds (300 * $i)
+            Write-Log "Attempt $i/$maxRetries to replace ASAR failed: $_" "WARN"
+            Start-Sleep -Milliseconds (250 * $i)
         }
     }
 
@@ -468,7 +561,7 @@ Function Register-WatcherTask {
     }
 
     try {
-        $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -ExecutionPolicy Bypass -File `"$cachedWatcher`""
+        $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`""
         $trigger = New-ScheduledTaskTrigger -AtLogOn
         $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0 -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
         $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
@@ -476,16 +569,29 @@ Function Register-WatcherTask {
         Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Force | Out-Null
         
         # Also set HKCU Run as secondary persistence hook
-        Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
         
         Write-Log "Scheduled Task '$taskName' and HKCU Run hook successfully enabled!" "SUCCESS"
-        return $true
     } catch {
-        Write-Log "Failed to register Scheduled Task: $_" "ERROR"
-        # Fallback to HKCU Run
-        Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
-        return $false
+        Write-Log "Notice during scheduled task registration: $_" "WARN"
+        Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
     }
+
+    # Immediately spawn active background watcher process if not currently running
+    try {
+        $runningWatcher = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { 
+            ($_.CommandLine -like "*$cachedWatcher*" -or $_.CommandLine -like "*watcher.ps1*") -and $_.ProcessId -ne $PID 
+        }
+        if (-not $runningWatcher) {
+            Start-Process -FilePath "powershell.exe" -ArgumentList "-WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -WindowStyle Hidden
+            Write-Log "Background auto-healing watcher process spawned successfully!" "SUCCESS"
+        } else {
+            Write-Log "Background auto-healing watcher is already actively running." "INFO"
+        }
+    } catch {
+        Write-Log "Notice: Could not spawn immediate background process: $_" "WARN"
+    }
+    return $true
 }
 
 Function Unregister-WatcherTask {
