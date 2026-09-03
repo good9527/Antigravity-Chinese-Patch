@@ -689,10 +689,6 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     { regex: /^Learn\s+more\s+about\s+(.+)$/i, format: (m) => `\u4e86\u89e3\u5173\u4e8e ${m[1]} \u7684\u66f4\u591a\u4fe1\u606f` },
     { regex: /^Open\s+(.+)\s+Preferences$/i, format: (m) => `\u6253\u5f00 ${m[1]} \u504f\u597d\u8bbe\u7f6e` },
     { regex: /^Open\s+(.+)\s+Settings$/i, format: (m) => `\u6253\u5f00 ${m[1]} \u8bbe\u7f6e` },
-    ` },
-    ` },
-    ` },
-    ` },
     { regex: /^Choose\s+a\s+predefined\s+(.+)\s+for\s+the\s+agent\.(.*)$/i, format: (m) => `\u4e3a\u667a\u80fd\u4f53\u9009\u62e9\u9884\u8bbe\u7684 ${m[1]}\u3002${m[2]}` },
     { regex: /^Scan\s+the\s+code\s+to\s+(.+)$/i, format: (m) => `\u626b\u63cf\u4e8c\u7ef4\u7801\u4ee5 ${m[1]}` }
   ];
