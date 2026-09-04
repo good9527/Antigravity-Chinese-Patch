@@ -1126,7 +1126,8 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     childList: true,
     subtree: true,
     characterData: true,
-    attributes: true
+    attributes: true,
+    attributeFilter: ['placeholder', 'title', 'aria-label']
   };
 
   function observeRoot(root) {
@@ -1165,7 +1166,7 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
         } else if (m.type === 'attributes') {
           const el = m.target;
           if (el.nodeType === 1 && !isBypassedElement(el)) {
-            walk(el);
+            translateAttributes(el, SAFE_ATTRS);
           }
         }
       }
@@ -1215,8 +1216,18 @@ electron_1.contextBridge.exposeInMainWorld('ide', ideAPI);
     window.addEventListener('popstate', sweep, { passive: true });
     window.addEventListener('hashchange', sweep, { passive: true });
 
-    // Periodic heartbeat sweep every 1.5s
-    setInterval(sweep, 1500);
+    // Idle-aware heartbeat: only run when the main thread has spare cycles
+    if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+      const scheduleIdle = () => {
+        window.requestIdleCallback(() => {
+          sweep();
+          setTimeout(scheduleIdle, 5000);
+        }, { timeout: 2000 });
+      };
+      setTimeout(scheduleIdle, 5000);
+    } else {
+      setInterval(sweep, 5000);
+    }
   }
 
   // 12. Hook DOM Ready State
