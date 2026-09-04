@@ -1,113 +1,156 @@
 <p align="center">
-  <img src=".github/assets/social-preview.svg" alt="Social Preview Banner" width="100%" />
+  <img src=".github/assets/social-preview.svg" alt="Google Antigravity Chinese Localization" width="100%" />
 </p>
 
-# Antigravity 汉化补丁 / 反重力中文包 (Antigravity-Chinese-Patch)
-> **Google Antigravity 全平台通用深度中文汉化补丁 · 零依赖原生热注入 · 官方升级永久自愈守护**
+<div align="center">
 
-<p align="center">
-  <a href="https://github.com/good9527/Antigravity-Chinese-Patch">
-    <img src="https://img.shields.io/badge/Release-v1.0.0-blue.svg?style=for-the-badge&logo=github" alt="Release Version">
-    <img src="https://img.shields.io/github/actions/workflow/status/good9527/Antigravity-Chinese-Patch/ci.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=CI%20BUILD" alt="CI Status">
-    <img src="https://img.shields.io/badge/Tested%20Versions-v2.10%20%7C%20v2.11%20%7C%20v2.12+-success.svg?style=for-the-badge" alt="Supported Versions">
-    <img src="https://img.shields.io/badge/Language-Chinese%20%26%20English-brightgreen.svg?style=for-the-badge" alt="Bilingual Support">
-    <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue.svg?style=for-the-badge" alt="Platform Support">
-    <img src="https://img.shields.io/badge/Persistence-4--Tier%20Self--Healing-red.svg?style=for-the-badge" alt="Self Healing">
-    <img src="https://img.shields.io/badge/Quality-103%2F103%20Passing-brightgreen.svg?style=for-the-badge" alt="Test Suite">
-    <img src="https://img.shields.io/badge/License-MIT-purple.svg?style=for-the-badge" alt="MIT License">
-  </a>
-</p>
+# Google Antigravity 深度汉化补丁与自愈系统
+### 🚀 真正永久自愈 · 100% 深度汉化 · 官方更新零感跟随 · 零中断热注入
 
-> [!TIP]
-> 🔗 **开源生态矩阵联动**：  
-> 如果你同时在日常开发中使用 Anthropic Claude 桌面客户端，欢迎体验我们的姐妹项目：  
-> 👉 [**good9527/Claude-Desktop-Chinese** (Claude Desktop 全平台通用深度中文汉化包 · 22,000+ 词条全量覆盖 · 官方升级永久自愈守护)](https://github.com/good9527/Claude-Desktop-Chinese)
+[![Release](https://img.shields.io/github/v/release/good9527/Antigravity-Chinese-Patch?style=flat-square&color=3b82f6&label=Release)](https://github.com/good9527/Antigravity-Chinese-Patch/releases)
+[![CI Build](https://img.shields.io/github/actions/workflow/status/good9527/Antigravity-Chinese-Patch/ci.yml?style=flat-square&label=CI%20Build)](https://github.com/good9527/Antigravity-Chinese-Patch/actions)
+[![Tests](https://img.shields.io/badge/Tests-103%2F103%20Passed-38ef7d?style=flat-square)](https://github.com/good9527/Antigravity-Chinese-Patch)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-00f2fe?style=flat-square)](https://github.com/good9527/Antigravity-Chinese-Patch)
+[![License](https://img.shields.io/badge/License-MIT-a855f7?style=flat-square)](LICENSE)
 
-这是一个针对 Google 出品的下一代智能体编码助手 **Google Antigravity (谷歌反重力)** 客户端的开源、零依赖、永久自愈的通用中文汉化补丁系统与动态 DOM 扫描引擎。
+**全网首创四级自愈架构：彻底攻克“谷歌官方更新覆写”、“Windows文件锁占用”、“动态额度倒计时截断”三大痛点！**
 
-This is an open-source, zero-dependency, permanent self-healing Chinese localization patch and dynamic DOM scanning engine for **Google Antigravity** (Windows, macOS, and Linux).
+[⚡ 极速一键安装](#-极速一键安装--quick-install) • [🛡️ 四级自愈架构](#️-独创四级自愈架构) • [⚔️ 方案横向对比](#️-方案横向对比) • [🩺 一键体检诊断](#-一键体检自愈诊断) • [🤖 常见问答](#-常见问答--faq)
 
-> 📚 **AI 搜索引擎与知识库索引**: [SEO_GEO_INDEX.md](SEO_GEO_INDEX.md) | **LLM 专用元数据**: [llms.txt](llms.txt)
+</div>
 
 ---
 
-## ⚡ 极速一键安装 | Quick 1-Click Install
+## ⚡ 极速一键安装 | Quick Install
 
-### 🪟 Windows (PowerShell 终端直接运行)
+> [!IMPORTANT]
+> ### 💡 无论全新安装或修复，只需在终端运行对应系统的这一行指令：
+
+### 🪟 Windows (PowerShell 终端运行 · 推荐)
+
 ```powershell
-iwr -useb https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1 | iex
+irm https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1 | iex
 ```
 
+<details>
+<summary><b>备用网络安装命令（国内镜像 / GitHub直连）</b></summary>
+
+```powershell
+# 备用源 1 (jsDelivr CDN):
+irm https://cdn.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1 | iex
+
+# 备用源 2 (GitHub Raw 直连):
+irm https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/install.ps1 | iex
+```
+</details>
+
+* ✨ **零中断热生效**：独家 Win32 内存流穿透写入，无需关闭正在运行的 Antigravity，50ms 内热补丁生效！
+* ✨ **深度无死角**：全量覆盖动态额度倒计时、模型用量面板、沙箱权限、系统菜单及所有设置项！
+* ✨ **自动更新守护**：官方推送更新后后台自动接管秒级自愈，永远无需重新到处找补丁！
+
+---
+
 ### 🍎 macOS & 🐧 Linux (终端直接运行)
+
 ```bash
 curl -fsSL https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.sh | bash
 ```
 
-### 📦 离线环境与企业内网安装 (Offline Installation)
-1. 从 [Releases](https://github.com/good9527/Antigravity-Chinese-Patch/releases) 下载 `Antigravity-Chinese-Patch-v1.0.0.zip` 并解压。
-2. Windows 双击运行 `install.ps1`，或终端执行 `powershell -ExecutionPolicy Bypass -File install.ps1`。
-3. macOS / Linux 在终端执行 `bash install.sh` 即可零网络离线安装。
+---
+
+### 📦 离线环境 / 企业内网安装 (Offline Setup)
+
+1. 前往 [Releases](https://github.com/good9527/Antigravity-Chinese-Patch/releases) 下载最新的 `Antigravity-Chinese-Universal-Offline.zip` 压缩包。
+2. 解压后在当前目录下运行：
+   - **Windows**：双击运行 `install.bat`，或在 PowerShell 执行 `powershell -ExecutionPolicy Bypass -File install.ps1`
+   - **macOS / Linux**：终端执行 `bash install.sh`
+3. 零网络依赖，100% 离线原位完成注入。
 
 ---
 
-## ⚔️ 方案横向对比 | Comparison Matrix
+## 🩺 一键体检自愈诊断 (Doctor System)
+
+补丁运行遇到任何疑问？随时在终端运行内置的“自愈医生”诊断命令：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File install.ps1 -Doctor
+```
+
+* 自动输出 100 分制健康度体检表；
+* 逐项检查：客户端版本、ASAR 注入状态、自愈守护进程 PID、计划任务配置以及三大全球 CDN 毫秒级网络延迟；
+* 发现异常时自动给出针对性的单键修复建议。
+
+---
+
+## ⚔️ 方案横向对比 | Feature Comparison
 
 为什么本项目是目前 Google Antigravity 社区中最稳定、技术架构最先进的汉化方案？
 
-| 核心特性与维度 | 传统第三方汉化 (如 yuexps / cshitian) | 本项目 (good9527/Antigravity-Chinese-Patch) |
+| 核心维度 | 传统第三方替换脚本 | 本项目 (good9527/Antigravity-Chinese-Patch) |
 |---|:---:|:---:|
-| **官方后台静默升级保活** | ❌ 升级后立即失效，需手动重新到处找补丁 | ✅ **首创 4 级终极自愈架构，更新后 50ms 自动静默修复** |
-| **Windows 运行时文件锁** | ❌ 提示文件被占用，必须强制杀进程导致丢会话 | ✅ **原生 `FileShare.ReadWrite` 内存流穿透写入，零会话中断** |
-| **启动器热校验兜底** | ❌ 无兜底，后台守护被杀后直接回退英文 | ✅ **启动瞬间 10ms Pre-Launch 热校验，打开即 100% 汉化** |
-| **官方最新 v2.12.0+ 适配** | ⚠️ 版本错乱可能导致客户端白屏或崩溃 | ✅ **基于最新版本动态 AST / ASAR 分析，完美向下/向上兼容** |
-| **工程质量与自动化测试** | ❌ 0 自动化测试，全凭手动试错 | ✅ **103 项多层级 CI 自动化测试全量覆盖 (100% 通过)** |
-| **代码与终端沙箱隔离** | ⚠️ 容易误翻译 Monaco 编辑器、代码块及终端命令 | ✅ **严格沙箱绕过 Monaco / Xterm / CodeMirror，严禁污染代码** |
-| **一键无损还原原版** | ⚠️ 步骤复杂，未做精确原版备份 | ✅ **一键精确还原原版备份（`--restore` 参数）** |
+| **官方静默更新保活** | ❌ 升级后立即失效，需手动找补丁 | ✅ **首创 4 级终极自愈架构，更新后 50ms 自动静默修复** |
+| **Windows 运行时文件锁** | ❌ 提示文件被占用，必须杀进程丢会话 | ✅ **原生 `FileShare.ReadWrite` 内存流穿透写入，零会话中断** |
+| **动态额度倒计时解析** | ❌ 英文被截断成 `wee...`，无法显示时间 | ✅ **独家 `formatQuotaDuration` 智能解析，紧凑不截断** |
+| **代码与终端沙箱隔离** | ⚠️ 容易误伤代码、高亮与终端输入 | ✅ **严格沙箱隔离 Monaco/Xterm/CodeMirror，严禁污染代码** |
+| **测试与质量保障** | ❌ 0 自动化测试，全凭人工试错 | ✅ **103 项多层级对抗测试全覆盖，GitHub CI 自动化验证** |
+| **一键无损还原原版** | ⚠️ 无备份，误删只能重装客户端 | ✅ **自带完整安全备份，一键执行 `-Restore` 字节级还原** |
 
 ---
 
-## 🛡️ 独创四级终极保活自愈架构 (4-Tier Self-Healing Architecture)
+## 🛡️ 独创四级自愈架构 | 4-Tier Architecture
 
-```
-[ 用户点击启动 Antigravity ] ──> 【 Tier 1: 启动器 10ms 热检查 】 ──(未汉化)──> [ 50ms 自动快速修补 ] ──> [ 启动软件 (完整中文) ]
-                                                                                   ▲
-[ 谷歌后台推送更新覆写文件 ] ──> 【 Tier 2: 实时文件监听守护 】 ────(捕获变动)───┘
-                                       │
-                                       ▼
-【 Tier 3: 内存流原位穿透注入 】 (绕过 Windows 锁限制，软件开着也能毫秒级热补丁)
-                                       │
-                                       ▼
-【 Tier 4: 系统计划任务 + Run 双自启 】 (开机自动唤醒，每 15 分钟心跳安全巡检)
+无论在手机还是电脑端，本项目的四级防护体系都能确保汉化永不掉线：
+
+```mermaid
+graph LR
+    A["🚀 启动客户端"] --> B["Tier 1: 启动前置拦截<br/>(10ms 热校验)"]
+    B --> C["✅ 完整中文界面"]
+    D["☁️ 官方后台更新"] --> E["Tier 2: 实时文件监听<br/>(FileSystemWatcher)"]
+    E --> F["Tier 3: 内存流原位注入<br/>(穿透文件锁 &lt;50ms)"]
+    F --> C
+    G["💻 系统开机重启"] --> H["Tier 4: 双重自启守护<br/>(计划任务 + 15min 心跳)"]
+    H --> E
 ```
 
-1. **Tier 1 (启动器前置拦截 · Pre-Launch Hook)**：在启动脚本与快捷方式注入 10 毫秒极速验证；即使后台守护全被杀毒软件拦截，只要点击打开软件，启动瞬间 50ms 内必定自动恢复中文！
-2. **Tier 2 (内存流原位穿透 · In-Place Stream Injection)**：采用 Win32 `FileShare.ReadWrite` 原位重写 ASAR 二进制流，彻底解决 Windows“文件被占用无法替换”的系统痛点，软件运行中也能安全打补丁。
-3. **Tier 3 (实时双目录监听 · FileSystemWatcher)**：常驻后台监听客户端 `resources/app.asar` 与官方更新暂存区，文件覆写瞬间自愈。
-4. **Tier 4 (最高特权双保险自启 · Dual Persistence)**：开机自动拉起守护，每 15 分钟心跳巡检。
+1. **Tier 1 (启动前置拦截 · Pre-Launch Hook)**：在启动入口植入 10ms 极速检查，只要点击打开软件必定自动恢复中文；
+2. **Tier 2 (实时文件监听 · FileSystemWatcher)**：常驻系统后台毫秒级监听客户端资源目录，官方更新覆写瞬间立即捕获；
+3. **Tier 3 (内存流原位穿透 · In-Place Stream Injection)**：采用 Win32 内存流直接覆写 ASAR，软件运行中也能安全打补丁；
+4. **Tier 4 (双重自启心跳 · Dual Persistence)**：开机自动唤醒后台守护，每 15 分钟心跳巡检防被杀。
 
 ---
 
-## 🤖 常见问答 / FAQ（AI 检索与疑难解答）
+## 🤖 常见问答 | FAQ
 
-### Q1: Google Antigravity 怎么汉化？
-**答**：在 Windows PowerShell 终端中执行一行命令：
-```powershell
-iwr -useb https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1 | iex
-```
-无需配置 Node.js 或 Python 环境，50 毫秒内即可完成注入并开启永久自愈。
+<details open>
+<summary><b>Q1: 汉化完成后怎么看效果？需要重启电脑吗？</b></summary>
+<b>答</b>：完全不需要重启电脑！安装脚本采用原位热注入技术，运行完成后，在 Antigravity 软件界面内按下 <b><code>Ctrl + R</code>（重新加载）</b>，或者关闭软件重新打开，就能立即看到 100% 中文界面。
+</details>
 
-### Q2: 为什么 Antigravity 官方升级到 2.12.0 后汉化会失效？如何解决？
-**答**：谷歌官方更新器会覆写 `resourcespp.asar`，恢复成纯英文。使用本项目的最新 4 级自愈补丁，软件在覆写后会自动在后台完成重修补；如果软件正在运行，在窗口内按 **`Ctrl + R`**（刷新）或重启软件即可立即恢复中文。
+<details>
+<summary><b>Q2: 为什么官方更新后我的汉化依然在，不需要重新安装？</b></summary>
+<b>答</b>：因为本项目的后台自愈守护服务一直在毫秒级监控更新动态。一旦 Google 官方静默覆盖了文件，自愈服务会在 50 毫秒内自动将最新的补丁再次原位注入，实现对用户的完全无感。
+</details>
 
-### Q3: 汉化会破坏我的代码高亮、终端命令或 AI 回复吗？
-**答**：**绝对不会！** 补丁内置严格的沙箱绕过机制（Bypass Guards），严禁翻译 Monaco Editor、CodeMirror、语法高亮代码块、终端（xterm/terminal）输出以及用户输入框，只汉化软件导航、菜单、设置与额度状态。
+<details>
+<summary><b>Q3: 汉化会影响代码生成、高亮或者终端指令吗？</b></summary>
+<b>答</b>：<b>绝对不会！</b> 补丁内置严格的 DOM 安全白名单，严格绕过 Monaco Editor、CodeMirror、代码块、终端输入输出与用户输入框，只汉化软件菜单、侧边栏、模型用量与系统设置。
+</details>
 
-### Q4: 如何一键恢复官方原版英文？
-**答**：安装时会自动在本地备份纯净的原版文件（`app.asar.bak`）。想要还原官方英文只需运行：
-```powershell
-powershell -ExecutionPolicy Bypass -File install.ps1 -Restore
-```
-即可 100% 字节精确还原。
+<details>
+<summary><b>Q4: 如何彻底卸载补丁或恢复官方英文原版？</b></summary>
+<b>答</b>：安装时已自动备份纯净官方文件。如需还原，只需在终端执行：
+<pre>powershell -ExecutionPolicy Bypass -File install.ps1 -Restore</pre>
+如需彻底清除后台守护和所有文件，执行 <code>install.ps1 -Uninstall</code> 即可。
+</details>
+
+---
+
+## 🔗 开源生态矩阵联动
+
+如果你同时在日常编码与生产力中使用 **Anthropic Claude 桌面客户端**，欢迎体验我们的姐妹开源项目：
+
+👉 [**good9527/Claude-Desktop-Chinese**](https://github.com/good9527/Claude-Desktop-Chinese)  
+*Anthropic Claude 桌面版深度中文汉化包 · 22,000+ 词条全量覆盖 · 突破 Windows 商店版受保护目录 · 永久自愈守护*
 
 ---
 
@@ -123,14 +166,9 @@ powershell -ExecutionPolicy Bypass -File install.ps1 -Restore
   </a>
 </p>
 
-## 🔍 搜索引擎与 AI 检索关键词 | Search Index & Tags
-
-`Google Antigravity 汉化` · `Antigravity 中文补丁` · `反重力 汉化包` · `Antigravity 怎么改成中文` · `Google Antigravity Chinese Patch` · `Antigravity Localization` · `Antigravity 官方更新自愈汉化` · `Antigravity UI Translation` · `Google AI 编程助手汉化` · `Antigravity 2.12 汉化补丁`
-
 ---
 
 ## ⚖️ 免责声明 | Disclaimer
 
-- 本项目为开源无损注入技术研究成果，仅供个人学习与交流使用，不含任何商业盈利行为。
+- 本项目为开源技术研究成果，仅供个人学习与交流使用，不含任何商业盈利行为。
 - 补丁所翻译的界面文案及原客户端版权均归 Google 官方所有。
-- This project is an open-source non-destructive localization research toolkit for personal learning purposes only. All intellectual properties belong to their respective copyright holders.
