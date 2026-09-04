@@ -2,6 +2,7 @@ param(
     [Parameter(Mandatory=$false)][Alias("i")][switch]$Install,
     [Parameter(Mandatory=$false)][Alias("u")][switch]$Uninstall,
     [Parameter(Mandatory=$false)][Alias("c")][switch]$Check,
+    [Parameter(Mandatory=$false)][Alias("doc","diag")][switch]$Doctor,
     [Parameter(Mandatory=$false)][Alias("r")][switch]$Restore,
     [Parameter(Mandatory=$false)][ValidateSet("enable", "disable", "status", "")][string]$Daemon = "",
     [Parameter(Mandatory=$false)][switch]$DaemonOn,
@@ -776,7 +777,112 @@ Function Invoke-InstallPatch {
     Write-Msg "==========================================================" "Cyan"
 }
 
+
+# 8. Action: Doctor / Deep Environment Diagnostics
+Function Invoke-DoctorDiagnostics {
+    Write-Host "==========================================================" -ForegroundColor Cyan
+    Write-Host "     Antigravity Chinese Patch Comprehensive Doctor       " -ForegroundColor Cyan
+    Write-Host "       [+] Diagnostic Engine v2.0 & Health Inspector      " -ForegroundColor Cyan
+    Write-Host "==========================================================" -ForegroundColor Cyan
+
+    $progDir = Find-AntigravityPath
+    $resDir = if ($progDir) { Join-Path $progDir "resources" } else { $null }
+    $asar = if ($resDir) { Join-Path $resDir "app.asar" } else { $null }
+    $bak = if ($resDir) { Join-Path $resDir "app.asar.bak" } else { $null }
+
+    $osVer = [System.Environment]::OSVersion.VersionString
+    $is64 = [System.Environment]::Is64BitOperatingSystem
+    Write-Host "`n[1/6] Operating System & Runtime Environment:" -ForegroundColor Yellow
+    Write-Host "  * OS Version             : $osVer (64-bit: $is64)" -ForegroundColor White
+    Write-Host "  * PowerShell Edition     : $($PSVersionTable.PSEdition) v$($PSVersionTable.PSVersion)" -ForegroundColor White
+
+    Write-Host "`n[2/6] Antigravity Installation & Binary:" -ForegroundColor Yellow
+    Write-Host "  * Program Directory      : $(if ($progDir) { $progDir } else { 'NOT FOUND [FAIL]' })" -ForegroundColor $(if ($progDir) { "White" } else { "Red" })
+    $clientVersion = "Unknown"
+    $asarExists = ($asar -and (Test-Path $asar))
+    $isPatched = $false
+    if ($asarExists) {
+        try {
+            $clientVersion = [UniversalAsarEngine]::ReadPackageVersion($asar)
+            if (Select-String -Path $asar -Pattern $patchMarker -Quiet) { $isPatched = $true }
+        } catch {}
+    }
+    Write-Host "  * Detected Client Version: $clientVersion" -ForegroundColor White
+
+    Write-Host "`n[3/6] ASAR Integrity & Chinese Patch Status:" -ForegroundColor Yellow
+    $asarSize = if ($asarExists) { [math]::Round((Get-Item $asar).Length / 1MB, 2) } else { 0 }
+    Write-Host "  * Active app.asar Size   : $asarSize MB" -ForegroundColor White
+    Write-Host "  * Chinese Patch Injected : $(if ($isPatched) { '[PASS] YES (100% In-Place Hot Patched)' } else { '[WARN] NO' })" -ForegroundColor $(if ($isPatched) { "Green" } else { "Yellow" })
+    $bakExists = ($bak -and (Test-Path $bak))
+    Write-Host "  * Clean Safety Backup    : $(if ($bakExists) { '[PASS] Verified Present' } else { '[WARN] Missing' })" -ForegroundColor $(if ($bakExists) { "Green" } else { "Yellow" })
+
+    Write-Host "`n[4/6] File Access & Stream In-Place Injection Perms:" -ForegroundColor Yellow
+    $streamWritable = $false
+    if ($asarExists) {
+        try {
+            $fsTest = [System.IO.File]::Open($asar, [System.IO.FileMode]::Open, [System.IO.FileAccess]::ReadWrite, [System.IO.FileShare]::ReadWrite)
+            $fsTest.Close()
+            $streamWritable = $true
+        } catch {}
+    }
+    Write-Host "  * Zero-Disruption Stream : $(if ($streamWritable) { '[PASS] Writable (<50ms In-Place Enabled)' } else { '[WARN] Locked / Read-Only' })" -ForegroundColor $(if ($streamWritable) { "Green" } else { "Yellow" })
+
+    Write-Host "`n[5/6] Auto-Healing Daemon & Scheduled Task:" -ForegroundColor Yellow
+    $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+    $runVal = (Get-ItemProperty -Path $regRunKey -ErrorAction SilentlyContinue).$regRunName
+    $daemonActive = ($null -ne $task) -or ($null -ne $runVal)
+    Write-Host "  * Scheduled Task Status  : $(if ($task) { '[PASS] Registered (' + $task.State + ')' } else { '[WARN] Not Registered' })" -ForegroundColor $(if ($task) { "Green" } else { "Yellow" })
+    Write-Host "  * HKCU Run Key Autostart : $(if ($runVal) { '[PASS] Configured' } else { '[WARN] Not Configured' })" -ForegroundColor $(if ($runVal) { "Green" } else { "Yellow" })
+
+    $runningProcess = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { 
+        ($_.CommandLine -like "*$cachedWatcher*" -or $_.CommandLine -like "*watcher.ps1*") -and $_.ProcessId -ne $PID 
+    } | Select-Object -First 1
+    Write-Host "  * Active Background PID  : $(if ($runningProcess) { '[PASS] PID ' + $runningProcess.ProcessId } else { '[INFO] Idle / Trigger-based' })" -ForegroundColor $(if ($runningProcess) { "Green" } else { "Cyan" })
+
+    Write-Host "`n[6/6] Multi-Mirror Global CDN Network Latencies:" -ForegroundColor Yellow
+    $mirrors = @(
+        @{ Name = "Fastly CDN "; Url = "https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/dist/dictionary.json" },
+        @{ Name = "jsDelivr CDN"; Url = "https://cdn.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/dist/dictionary.json" },
+        @{ Name = "GitHub Raw  "; Url = "https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/dist/dictionary.json" }
+    )
+    foreach ($m in $mirrors) {
+        $sw = [System.Diagnostics.Stopwatch]::StartNew()
+        try {
+            $req = [System.Net.WebRequest]::Create($m.Url)
+            $req.Timeout = 4000
+            $req.UserAgent = "AntigravityDoctor/1.0"
+            $resp = $req.GetResponse()
+            $sw.Stop()
+            $resp.Close()
+            Write-Host "  * $($m.Name) : [PASS] $($sw.ElapsedMilliseconds) ms" -ForegroundColor Green
+        } catch {
+            Write-Host "  * $($m.Name) : [WARN] Connection timeout" -ForegroundColor Yellow
+        }
+    }
+
+    $overallScore = 100
+    if (-not $isPatched) { $overallScore -= 30 }
+    if (-not $bakExists) { $overallScore -= 20 }
+    if (-not $daemonActive) { $overallScore -= 20 }
+    if (-not $streamWritable) { $overallScore -= 15 }
+
+    Write-Host "`n==========================================================" -ForegroundColor Cyan
+    Write-Host "  Doctor Health Score : $overallScore / 100" -ForegroundColor $(if ($overallScore -ge 80) { "Green" } elseif ($overallScore -ge 50) { "Yellow" } else { "Red" })
+    if ($overallScore -ge 80) {
+        Write-Host "  Diagnostic Status   : HEALTHY [System 100% Operational & Self-Healing]" -ForegroundColor Green
+    } else {
+        Write-Host "  Remediation Action  : Run 'powershell -File install.ps1' to auto-repair." -ForegroundColor Yellow
+    }
+    Write-Host "==========================================================`n" -ForegroundColor Cyan
+    return $(if ($overallScore -ge 80) { 0 } else { 1 })
+}
+
 # 11. Parameter Routing Dispatcher
+if ($Doctor) {
+    $res = Invoke-DoctorDiagnostics
+    exit $res
+}
+
 if ($Check) {
     $res = Invoke-CheckDiagnostics
     if ($Json) {

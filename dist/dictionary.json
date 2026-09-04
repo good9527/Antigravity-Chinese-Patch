@@ -427,7 +427,7 @@
   "Apply Changes": "应用更改",
   "Discard": "放弃",
   "Discard Changes": "放弃更改",
-  "Revert": "撤销",
+  "Revert": "还原",
   "Revert Changes": "撤销更改",
   "Keep Changes": "保留更改",
   "Compare Changes": "对比差异",
@@ -628,5 +628,17 @@
   "Browser settings have moved": "浏览器设置已迁移",
   "Browser settings have moved to the Browser section of General settings. Go to General settings": "浏览器设置现已迁移至“常规设置”中的“浏览器”区域。前往常规设置",
   "Browser settings have moved to the Browser section of General settings.": "浏览器设置现已迁移至“常规设置”中的“浏览器”区域。",
-  "Go to General settings": "前往常规设置"
+  "Go to General settings": "前往常规设置",
+  "Preferences": "首选项",
+  "Reload": "重新加载",
+  "Force Reload": "强制重新加载",
+  "Actual Size": "实际大小",
+  "Indexing codebase...": "代码库索引中...",
+  "Thinking Process": "思考过程",
+  "View changes": "查看代码变更",
+  "Accept all": "全部接受",
+  "Reject all": "全部拒绝",
+  "Close Tab": "关闭标签页",
+  "Split Editor Right": "向右拆分编辑器",
+  "Split Editor Down": "向下拆分编辑器"
 }
