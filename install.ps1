@@ -505,18 +505,25 @@ Function Set-DaemonState($action) {
     }
 
     if ($action -eq "enable") {
+        # Deploy zero-window silent runner VBS (bypasses Windows 11 Windows Terminal popup)
+        $silentVbs = Join-Path $cacheDir "silent_runner.vbs"
+        $vbsCode = "Set objShell = CreateObject(`"WScript.Shell`")`r`nIf WScript.Arguments.Count > 0 Then`r`n    objShell.Run `"powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"`"`" & WScript.Arguments(0) & `"`"`"`, 0, False`r`nEnd If`r`n"
+        Set-Content -Path $silentVbs -Value $vbsCode -Encoding ASCII
+
+        $silentCmd = "wscript.exe `"$silentVbs`" `"$cachedWatcher`""
+
         try {
-            $taskAction = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`""
+            $taskAction = New-ScheduledTaskAction -Execute "wscript.exe" -Argument "`"$silentVbs`" `"$cachedWatcher`""
             $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
             $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0 -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
             $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
             Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -Principal $principal -Force | Out-Null
             
-            Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
-            Write-Msg "Auto-healing daemon enabled (Scheduled Task: $taskName + Run Key)." "Green"
+            Set-ItemProperty -Path $regRunKey -Name $regRunName -Value $silentCmd -ErrorAction SilentlyContinue
+            Write-Msg "Auto-healing daemon enabled (100% Invisible Background Silent Mode)." "Green"
         } catch {
-            Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
-            Write-Msg "Auto-healing daemon enabled via HKCU Run key." "Yellow"
+            Set-ItemProperty -Path $regRunKey -Name $regRunName -Value $silentCmd -ErrorAction SilentlyContinue
+            Write-Msg "Auto-healing daemon enabled via HKCU Run key (Silent Mode)." "Yellow"
         }
 
         # Immediately spawn active background watcher process if not currently running
