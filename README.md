@@ -23,19 +23,16 @@
 
 ## ⚡ 极速一键安装 | Quick Install
 
-<p align="center">
-  <img src=".github/assets/demo-terminal.svg" alt="1-Click Installation Terminal Animation" width="100%" />
-</p>
-
-
-> [!IMPORTANT]
-> ### 💡 无论全新安装或修复，只需在终端运行对应系统的这一行指令：
-
-### 🪟 Windows (PowerShell 终端运行 · 推荐)
+### 🪟 Windows (PowerShell 终端直接运行 · 推荐)
 
 ```powershell
 irm https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1 | iex
 ```
+
+> [!TIP]
+> - ✨ **零中断热生效**：独家 Win32 内存流穿透写入，无需关闭正在运行的 Antigravity，50ms 内热补丁生效！
+> - ✨ **深度无死角**：全量覆盖动态额度倒计时、模型用量面板、沙箱权限、系统菜单及所有设置项！
+> - ✨ **自动更新守护**：官方推送更新后后台自动接管秒级自愈，永远无需重新到处找补丁！
 
 <details>
 <summary><b>备用网络安装命令（国内镜像 / GitHub直连）</b></summary>
@@ -48,10 +45,6 @@ irm https://cdn.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.
 irm https://raw.githubusercontent.com/good9527/Antigravity-Chinese-Patch/main/install.ps1 | iex
 ```
 </details>
-
-* ✨ **零中断热生效**：独家 Win32 内存流穿透写入，无需关闭正在运行的 Antigravity，50ms 内热补丁生效！
-* ✨ **深度无死角**：全量覆盖动态额度倒计时、模型用量面板、沙箱权限、系统菜单及所有设置项！
-* ✨ **自动更新守护**：官方推送更新后后台自动接管秒级自愈，永远无需重新到处找补丁！
 
 ---
 
@@ -88,11 +81,6 @@ powershell -ExecutionPolicy Bypass -File install.ps1 -Doctor
 ---
 
 ## ⚔️ 方案横向对比 | Feature Comparison
-
-<p align="center">
-  <img src=".github/assets/before-after.svg" alt="Before vs After Comparison" width="100%" />
-</p>
-
 
 为什么本项目是目前 Google Antigravity 社区中最稳定、技术架构最先进的汉化方案？
 
