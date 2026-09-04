@@ -23,6 +23,11 @@
 
 ## ⚡ 极速一键安装 | Quick Install
 
+<p align="center">
+  <img src=".github/assets/demo-terminal.svg" alt="1-Click Installation Terminal Animation" width="100%" />
+</p>
+
+
 > [!IMPORTANT]
 > ### 💡 无论全新安装或修复，只需在终端运行对应系统的这一行指令：
 
@@ -83,6 +88,11 @@ powershell -ExecutionPolicy Bypass -File install.ps1 -Doctor
 ---
 
 ## ⚔️ 方案横向对比 | Feature Comparison
+
+<p align="center">
+  <img src=".github/assets/before-after.svg" alt="Before vs After Comparison" width="100%" />
+</p>
+
 
 为什么本项目是目前 Google Antigravity 社区中最稳定、技术架构最先进的汉化方案？
 

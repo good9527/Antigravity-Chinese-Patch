@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300">
+  <defs>
+    <linearGradient id="badBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181113"/>
+      <stop offset="100%" stop-color="#241217"/>
+    </linearGradient>
+    <linearGradient id="goodBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1713"/>
+      <stop offset="100%" stop-color="#0e231b"/>
+    </linearGradient>
+    <style>
+      .card-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; font-weight: bold; }
+      .row-label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 12px; fill: #94a3b8; }
+      .text-bad { font-family: Consolas, monospace; font-size: 13px; fill: #f87171; font-weight: 600; }
+      .text-good { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13.5px; fill: #4ade80; font-weight: 700; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="300" rx="14" fill="#0b0f19"/>
+
+  <!-- Left Column: Bad -->
+  <g transform="translate(20, 20)">
+    <rect width="365" height="260" rx="12" fill="url(#badBg)" stroke="#7f1d1d" stroke-width="1.5"/>
+    <text x="20" y="36" fill="#ef4444" class="card-title">❌ 官方原版 / 传统粗糙替换</text>
+    
+    <g transform="translate(20, 65)">
+      <text x="0" y="0" class="row-label">额度动态倒计时 (英文过长被 CSS 截断):</text>
+      <rect x="0" y="8" width="325" height="32" rx="6" fill="#2d1519" stroke="#991b1b" stroke-width="1"/>
+      <text x="12" y="29" class="text-bad">You have used some of your wee...</text>
+    </g>
+
+    <g transform="translate(20, 130)">
+      <text x="0" y="0" class="row-label">贪婪正则导致的“中英夹生饭”机翻:</text>
+      <rect x="0" y="8" width="325" height="32" rx="6" fill="#2d1519" stroke="#991b1b" stroke-width="1"/>
+      <text x="12" y="29" class="text-bad">管理 your model quota and credits.</text>
+    </g>
+
+    <g transform="translate(20, 195)">
+      <text x="0" y="0" class="row-label">常规设置与沙箱权限 (大面积遗漏):</text>
+      <rect x="0" y="8" width="325" height="32" rx="6" fill="#2d1519" stroke="#991b1b" stroke-width="1"/>
+      <text x="12" y="29" class="text-bad">Configure allowed commands outside...</text>
+    </g>
+  </g>
+
+  <!-- Right Column: Good -->
+  <g transform="translate(415, 20)">
+    <rect width="365" height="260" rx="12" fill="url(#goodBg)" stroke="#166534" stroke-width="1.5"/>
+    <text x="20" y="36" fill="#22c55e" class="card-title">✅ 本项目 100% 深度自愈汉化</text>
+
+    <g transform="translate(20, 65)">
+      <text x="0" y="0" class="row-label">智能倒计时解析器 (完整优雅紧凑):</text>
+      <rect x="0" y="8" width="325" height="32" rx="6" fill="#132c22" stroke="#15803d" stroke-width="1"/>
+      <text x="12" y="29" class="text-good">已使用部分每周额度，将在 4 天 22 小时后完全重置。</text>
+    </g>
+
+    <g transform="translate(20, 130)">
+      <text x="0" y="0" class="row-label">纯正地道人工级润色 (杜绝半生机翻):</text>
+      <rect x="0" y="8" width="325" height="32" rx="6" fill="#132c22" stroke="#15803d" stroke-width="1"/>
+      <text x="12" y="29" class="text-good">管理您的模型配额与点数。</text>
+    </g>
+
+    <g transform="translate(20, 195)">
+      <text x="0" y="0" class="row-label">642+ 词条全量覆盖 (菜单/设置/权限):</text>
+      <rect x="0" y="8" width="325" height="32" rx="6" fill="#132c22" stroke="#15803d" stroke-width="1"/>
+      <text x="12" y="29" class="text-good">配置沙箱外允许执行的命令。</text>
+    </g>
+  </g>
+</svg>

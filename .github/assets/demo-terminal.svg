@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="800" height="360">
+  <defs>
+    <linearGradient id="termBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090d16"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <style>
+      .t-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; font-size: 13px; fill: #94a3b8; }
+      .code-font { font-family: Consolas, 'Fira Code', Monaco, 'Courier New', monospace; font-size: 14px; }
+      .prompt { fill: #38bdf8; font-weight: bold; }
+      .cmd { fill: #f8fafc; font-weight: 600; }
+      .info { fill: #94a3b8; }
+      .success { fill: #4ade80; font-weight: bold; }
+      .cyan-highlight { fill: #22d3ee; }
+      .gold-highlight { fill: #fbbf24; font-weight: bold; }
+
+      @keyframes typeCmd {
+        0%, 5% { opacity: 0; }
+        15%, 100% { opacity: 1; }
+      }
+      @keyframes showL1 { 0%, 15% { opacity: 0; transform: translateY(4px); } 25%, 100% { opacity: 1; transform: translateY(0); } }
+      @keyframes showL2 { 0%, 30% { opacity: 0; transform: translateY(4px); } 40%, 100% { opacity: 1; transform: translateY(0); } }
+      @keyframes showL3 { 0%, 45% { opacity: 0; transform: translateY(4px); } 55%, 100% { opacity: 1; transform: translateY(0); } }
+      @keyframes showL4 { 0%, 60% { opacity: 0; transform: translateY(4px); } 70%, 100% { opacity: 1; transform: translateY(0); } }
+      @keyframes showL5 { 0%, 75% { opacity: 0; transform: translateY(4px); } 85%, 100% { opacity: 1; transform: translateY(0); } }
+      @keyframes cursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+      .anim-cmd { animation: typeCmd 9s infinite; }
+      .anim-l1 { animation: showL1 9s infinite; }
+      .anim-l2 { animation: showL2 9s infinite; }
+      .anim-l3 { animation: showL3 9s infinite; }
+      .anim-l4 { animation: showL4 9s infinite; }
+      .anim-l5 { animation: showL5 9s infinite; }
+      .cursor { animation: cursorBlink 0.9s infinite; }
+    </style>
+  </defs>
+
+  <!-- Window Frame -->
+  <rect width="800" height="360" rx="14" fill="url(#termBg)" stroke="#334155" stroke-width="1.5"/>
+  
+  <!-- Title Bar -->
+  <path d="M0,14 Q0,0 14,0 L786,0 Q800,0 800,14 L800,40 L0,40 Z" fill="#1e293b"/>
+  <circle cx="22" cy="20" r="6" fill="#ef4444"/>
+  <circle cx="42" cy="20" r="6" fill="#eab308"/>
+  <circle cx="62" cy="20" r="6" fill="#22c55e"/>
+  <text x="400" y="24" text-anchor="middle" class="t-title">PowerShell - Antigravity In-Place Hot Patch</text>
+
+  <!-- Terminal Content -->
+  <g transform="translate(30, 80)" class="code-font">
+    <!-- Command Line -->
+    <text x="0" y="0">
+      <tspan class="prompt">PS C:\&gt; </tspan>
+      <tspan class="cmd anim-cmd">irm https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@main/install.ps1 | iex</tspan>
+      <tspan fill="#38bdf8" class="cursor">█</tspan>
+    </text>
+
+    <!-- Output Lines -->
+    <g class="anim-l1" transform="translate(0, 38)">
+      <text x="0" y="0" class="info">[*] 检测到 Google Antigravity 安装目录: <tspan class="cyan-highlight">C:\Users\...\Programs\antigravity</tspan> (v2.12.0)</text>
+    </g>
+
+    <g class="anim-l2" transform="translate(0, 72)">
+      <text x="0" y="0" class="info">[*] 正在执行 Win32 内存流原位热注入 (穿透文件占用锁)...</text>
+    </g>
+
+    <g class="anim-l3" transform="translate(0, 106)">
+      <text x="0" y="0" class="success">[✔] 原位内存流注入完成 (&lt;50ms, 零进程中断, 客户端无需关闭!)</text>
+    </g>
+
+    <g class="anim-l4" transform="translate(0, 140)">
+      <text x="0" y="0" class="cyan-highlight">[✔] 4级终极自愈守护已激活 (计划任务 + HKCU Run 双重唤醒, 官方升级永久保活)</text>
+    </g>
+
+    <g class="anim-l5" transform="translate(0, 185)">
+      <!-- Success Badge Box -->
+      <rect x="-6" y="-22" width="740" height="42" rx="8" fill="#1e293b" stroke="#38ef7d" stroke-width="1.2"/>
+      <text x="14" y="5" class="gold-highlight">[🎉 汉化补丁安装成功！] <tspan fill="#f1f5f9">在 Antigravity 窗口按下 </tspan><tspan fill="#38bdf8">Ctrl + R</tspan><tspan fill="#f1f5f9"> 刷新，立即呈现 100% 完整中文！</tspan></text>
+    </g>
+  </g>
+</svg>
