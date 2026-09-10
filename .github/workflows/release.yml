@@ -52,22 +52,21 @@ jobs:
           cp -r watcher/* package/watcher/
           cp install.ps1 package/
           cp install.sh package/
-          cp patch_antigravity.ps1 package/
-          cp "安装汉化补丁.bat" package/
+          cp install.bat package/
           cp README.md package/
           cd package
-          zip -r ../Antigravity-Chinese-Patch-Elite.zip ./*
+          zip -r ../Antigravity-Chinese-Patch.zip ./*
           cd ..
-          sha256sum Antigravity-Chinese-Patch-Elite.zip > Antigravity-Chinese-Patch-Elite.zip.sha256
-          sha256sum Antigravity-Chinese-Patch-Elite.zip > SHA256SUMS.txt
+          sha256sum Antigravity-Chinese-Patch.zip > Antigravity-Chinese-Patch.zip.sha256
+          sha256sum Antigravity-Chinese-Patch.zip > SHA256SUMS.txt
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Antigravity-Chinese-Patch-Elite
+          name: Antigravity-Chinese-Patch
           path: |
-            Antigravity-Chinese-Patch-Elite.zip
-            Antigravity-Chinese-Patch-Elite.zip.sha256
+            Antigravity-Chinese-Patch.zip
+            Antigravity-Chinese-Patch.zip.sha256
             SHA256SUMS.txt
 
       - name: Create GitHub Release
@@ -75,7 +74,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            Antigravity-Chinese-Patch-Elite.zip
-            Antigravity-Chinese-Patch-Elite.zip.sha256
+            Antigravity-Chinese-Patch.zip
+            Antigravity-Chinese-Patch.zip.sha256
             SHA256SUMS.txt
           generate_release_notes: true

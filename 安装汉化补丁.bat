@@ -1,4 +1,4 @@
-﻿@echo off
+@echo off
 chcp 65001 >nul
 title Antigravity 中文汉化管理面板 (Elite Toolkit v3.0)
 
@@ -36,7 +36,7 @@ echo ======================================================================
 echo           [1] 一键安装 / 更新汉化补丁 (In-place Hot Patch)
 echo ======================================================================
 echo.
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0patch_antigravity.ps1" -Install
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0install.ps1"
 echo.
 echo 操作完成，按任意键返回主菜单...
 pause >nul
