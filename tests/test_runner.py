@@ -13,6 +13,15 @@ import time
 import argparse
 import traceback
 
+if sys.platform == "win32":
+    try:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        if hasattr(sys.stderr, "reconfigure"):
+            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 # Ensure project root and tests/ directory are in sys.path
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
@@ -242,7 +251,7 @@ def run_tests(tier="all", verbosity=2, no_color=False):
     if is_successful:
         print(f"  {Color.BOLD}{Color.GREEN}OVERALL STATUS: ALL ASSIGNED TESTS PASSED [OK]{Color.RESET}")
     else:
-        print(f"  {Color.BOLD}{Color.RED}OVERALL STATUS: TESTS FAILED — BUGS DETECTED [FAIL]{Color.RESET}")
+        print(f"  {Color.BOLD}{Color.RED}OVERALL STATUS: TESTS FAILED - BUGS DETECTED [FAIL]{Color.RESET}")
     print(f"{Color.BOLD}{Color.CYAN}======================================================================{Color.RESET}\n")
 
     return 0 if is_successful else 1
