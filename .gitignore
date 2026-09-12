@@ -23,3 +23,11 @@ updater.js
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# Agent workspace and Python cache
+.agents/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+local/
