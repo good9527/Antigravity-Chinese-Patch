@@ -15,13 +15,18 @@
 
 **全网首创四级自愈架构：彻底攻克“谷歌官方更新覆写”、“Windows文件锁占用”、“动态额度倒计时截断”三大痛点！**
 
-[⚡ 极速一键安装](#-极速一键安装--quick-install) • [🛡️ 四级自愈架构](#️-独创四级自愈架构--4-tier-architecture) • [⚔️ 方案横向对比](#️-方案横向对比--feature-comparison) • [🩺 一键体检诊断](#-一键体检自愈诊断-doctor-system) • [🤖 常见问答](#-常见问答--faq)
+[⚡ 极速一键安装](#quick-install) • [🛡️ 四级自愈架构](#architecture) • [⚔️ 方案横向对比](#comparison) • [🩺 一键体检诊断](#doctor) • [🤖 常见问答](#faq)
 
 </div>
 
 ---
 
+<a id="quick-install"></a>
 ## ⚡ 极速一键安装 | Quick Install
+
+<p align="center">
+  <img src=".github/assets/showcase.jpg" alt="汉化效果对比" width="100%" />
+</p>
 
 ### 🪟 Windows (PowerShell 终端直接运行 · 推荐)
 
@@ -66,6 +71,7 @@ curl -fsSL https://fastly.jsdelivr.net/gh/good9527/Antigravity-Chinese-Patch@mai
 
 ---
 
+<a id="doctor"></a>
 ## 🩺 一键体检自愈诊断 (Doctor System)
 
 补丁运行遇到任何疑问？随时在终端运行内置的“自愈医生”诊断命令：
@@ -80,6 +86,7 @@ powershell -ExecutionPolicy Bypass -File install.ps1 -Doctor
 
 ---
 
+<a id="comparison"></a>
 ## ⚔️ 方案横向对比 | Feature Comparison
 
 为什么本项目是目前 Google Antigravity 社区中最稳定、技术架构最先进的汉化方案？
@@ -95,6 +102,7 @@ powershell -ExecutionPolicy Bypass -File install.ps1 -Doctor
 
 ---
 
+<a id="architecture"></a>
 ## 🛡️ 独创四级自愈架构 | 4-Tier Architecture
 
 无论在手机还是电脑端，本项目的四级防护体系都能确保汉化永不掉线：
@@ -117,6 +125,7 @@ graph LR
 
 ---
 
+<a id="faq"></a>
 ## 🤖 常见问答 | FAQ
 
 <details open>
