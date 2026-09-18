@@ -222,7 +222,7 @@ class Tier5WhiteBoxEngine:
         self.re_compact_time = re.compile(r"^(\d+)\s*(mo|[dmhsy])(?:\s+ago)?$", re.I)
         self.re_verbose_time = re.compile(r"^(\d+)\s*(months?|days?|hours?|hrs?|minutes?|mins?|seconds?|secs?|years?|yrs?)\s+ago$", re.I)
 
-        self.re_panes = re.compile(r"^(Subagents|Files Changed|Artifacts|Uploads|Background Tasks|MCP Servers)\s+(\d+)$", re.I)
+        self.re_panes = re.compile(r"^(Subagents|Files Changed|Artifacts|Uploads|Background Tasks|MCP Servers|Terminals)\s+(\d+)$", re.I)
         self.re_files_changed = re.compile(r"^(\d+)\s+files?\s+changed$", re.I)
         self.re_files_modified = re.compile(r"^(\d+)\s+files?\s+modified$", re.I)
         self.re_files_added = re.compile(r"^(\d+)\s+files?\s+added$", re.I)
@@ -332,7 +332,8 @@ class Tier5WhiteBoxEngine:
                 'artifacts': '\u4ea7\u7269',
                 'uploads': '\u5df2\u4e0a\u4f20\u6587\u4ef6',
                 'background tasks': '\u540e\u53f0\u4efb\u52a1',
-                'mcp servers': 'MCP \u670d\u52a1'
+                'mcp servers': 'MCP \u670d\u52a1',
+                'terminals': '\u7ec8\u7aef'
             }
             label = type_map.get(m.group(1).lower(), m.group(1))
             return f"{label} {m.group(2)}"
@@ -650,6 +651,8 @@ class TestTier5RegexAndTimers(unittest.TestCase):
             ("Uploads 5", "已上传文件 5"),
             ("Background Tasks 2", "后台任务 2"),
             ("MCP Servers 10", "MCP 服务 10"),
+            ("Terminals 0", "终端 0"),
+            ("Terminals 3", "终端 3"),
             ("1 file changed", "1 个文件已修改"),
             ("10 files changed", "10 个文件已修改"),
             ("1 file modified", "1 个文件已修改"),

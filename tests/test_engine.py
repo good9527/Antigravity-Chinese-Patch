@@ -133,20 +133,20 @@ class SpecificationTranslationEngine:
         if normalized in self.dictionary:
             return self.dictionary[normalized]
 
-        # 2. Dynamic Counter Badges: (Subagents|Files Changed|Artifacts|Uploads|Background Tasks) \d+
-        pane_match = re.match(r"^(Subagents|Files Changed|Artifacts|Uploads|Background Tasks)\s+(\d+)$", trimmed, re.IGNORECASE)
+        # 2. Dynamic Counter Badges: (Subagents|Files Changed|Artifacts|Uploads|Background Tasks|Terminals) \d+
+        pane_match = re.match(r"^(Subagents|Files Changed|Artifacts|Uploads|Background Tasks|Terminals)\s+(\d+)$", trimmed, re.IGNORECASE)
         if pane_match:
-            label_name = pane_match.group(1).lower()
-            num = pane_match.group(2)
+            kind, count = pane_match.group(1).lower(), pane_match.group(2)
             type_map = {
                 "subagents": "子智能体",
                 "files changed": "已修改文件",
                 "artifacts": "产物",
                 "uploads": "已上传文件",
-                "background tasks": "后台任务"
+                "background tasks": "后台任务",
+                "terminals": "终端",
             }
-            label = type_map.get(label_name, pane_match.group(1))
-            return normalized.replace(trimmed, f"{label} {num}")
+            label = type_map.get(kind, pane_match.group(1))
+            return normalized.replace(trimmed, f"{label} {count}")
 
         # 3. Dynamic File Change Counter: N files changed / 1 file changed
         files_changed_match = re.match(r"^(\d+)\s+files?\s+changed$", trimmed, re.IGNORECASE)
@@ -498,6 +498,11 @@ class TestDynamicRegexMatchers(unittest.TestCase):
     def test_f04_background_tasks_counter(self):
         """F04: 'Background Tasks 2' -> '后台任务 2'"""
         self.assertEqual(self.engine.translate_text("Background Tasks 2"), "后台任务 2")
+
+    def test_f04_terminals_counter(self):
+        """F04: 'Terminals 0' -> '终端 0'"""
+        self.assertEqual(self.engine.translate_text("Terminals 0"), "终端 0")
+        self.assertEqual(self.engine.translate_text("Terminals 3"), "终端 3")
 
     def test_f05_n_files_changed_plural_and_singular(self):
         """F05: '1 file changed' and '5 files changed'"""
