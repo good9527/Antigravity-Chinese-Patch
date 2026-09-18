@@ -664,7 +664,7 @@ Function Start-WatcherService {
     $actionBlock = {
         param($source, $eventArgs)
         $changedPath = $eventArgs.FullPath
-        if ($changedPath -like "*app.asar*") {
+        if ($changedPath -like "*app.asar" -and (Test-Path $changedPath -PathType Leaf)) {
             Test-And-Patch -targetAsarPath $changedPath
         }
     }
@@ -689,10 +689,40 @@ Function Start-WatcherService {
 
     Write-Log "Watcher active and monitoring. Entering background heartbeat loop..." "SUCCESS"
 
-    # Heartbeat loop: periodic check every 30 minutes with ultra-low CPU impact
+    # Heartbeat loop: periodic check with ultra-low CPU impact (fast polling every 10s)
+    $lastCheckedSize = 0
+    $lastCheckedTime = [DateTime]::MinValue
+    try {
+        if (Test-Path $targetAsar) {
+            $initItem = Get-Item $targetAsar -ErrorAction SilentlyContinue
+            if ($initItem) {
+                $lastCheckedTime = $initItem.LastWriteTimeUtc
+                $lastCheckedSize = $initItem.Length
+            }
+        }
+    } catch {}
+
     while ($true) {
-        Start-Sleep -Seconds 1800
-        Test-And-Patch -targetAsarPath $targetAsar
+        Start-Sleep -Seconds 10
+        try {
+            if (Test-Path $targetAsar) {
+                $item = Get-Item $targetAsar -ErrorAction SilentlyContinue
+                if ($item) {
+                    $currTime = $item.LastWriteTimeUtc
+                    $currSize = $item.Length
+                    if ($currTime -ne $lastCheckedTime -or $currSize -ne $lastCheckedSize) {
+                        $patched = Test-And-Patch -targetAsarPath $targetAsar
+                        if ($patched) {
+                            $reItem = Get-Item $targetAsar -ErrorAction SilentlyContinue
+                            if ($reItem) {
+                                $lastCheckedTime = $reItem.LastWriteTimeUtc
+                                $lastCheckedSize = $reItem.Length
+                            }
+                        }
+                    }
+                }
+            }
+        } catch {}
     }
 }
 
