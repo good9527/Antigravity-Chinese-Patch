@@ -154,10 +154,13 @@ graph LR
 
 ## 🔗 开源生态矩阵联动
 
-如果你同时在日常编码与生产力中使用 **Anthropic Claude 桌面客户端**，欢迎体验我们的姐妹开源项目：
+协同使用作者打造的 Windows AI 全栈开源工具链，释放巅峰生产力：
 
-👉 [**good9527/Claude-Desktop-Chinese**](https://github.com/good9527/Claude-Desktop-Chinese)  
-*Anthropic Claude 桌面版深度中文汉化包 · 22,000+ 词条全量覆盖 · 突破 Windows 商店版受保护目录 · 永久自愈守护*
+| 项目仓库 | 核心定位 | 核心亮点 |
+|---|---|---|
+| 🚀 [**Antigravity-Chinese-Patch**](https://github.com/good9527/Antigravity-Chinese-Patch) | **Google 智能体汉化补丁** | 本项目：Google Antigravity 全平台通用汉化补丁 · 零依赖原生热注入 · 动态额度倒计时解析 · 10s 级极速自愈 |
+| ⚡ [**Claude-Desktop-Chinese**](https://github.com/good9527/Claude-Desktop-Chinese) | **Claude 桌面汉化补丁** | Anthropic Claude 桌面版深度汉化包 · 22,319 词条全量覆盖 · 突破 Windows 商店版受保护目录 · 官方升级 10s 永久自愈 |
+| 🤖 [**win-automation-mcp**](https://github.com/good9527/win-automation-mcp) | **Claude 原生 MCP 工具** | 专为 Claude 桌面版打造，赋予 Claude 真实控制 Windows 键鼠、窗口管理与自动化操作的超级能力！ |
 
 ---
 
