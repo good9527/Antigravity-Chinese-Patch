@@ -567,15 +567,27 @@ Function Register-WatcherTask {
         $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
         
         Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Force | Out-Null
-        
-        # Also set HKCU Run as secondary persistence hook
-        Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
-        
-        Write-Log "Scheduled Task '$taskName' and HKCU Run hook successfully enabled!" "SUCCESS"
-    } catch {
-        Write-Log "Notice during scheduled task registration: $_" "WARN"
-        Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
-    }
+    } catch {}
+
+    # Layer 2: HKCU Run registry autostart
+    Set-ItemProperty -Path $regRunKey -Name $regRunName -Value "powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`"" -ErrorAction SilentlyContinue
+
+    # Layer 3: Shell:Startup User Startup Folder (100% reliable for standard non-admin users)
+    try {
+        $startupDir = [Environment]::GetFolderPath('Startup')
+        if (Test-Path $startupDir) {
+            $wsh = New-Object -ComObject WScript.Shell
+            $lnkPath = Join-Path $startupDir "AntigravityChinesePatchWatcher.lnk"
+            $shortcut = $wsh.CreateShortcut($lnkPath)
+            $shortcut.TargetPath = "powershell.exe"
+            $shortcut.Arguments = "-WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File `"$cachedWatcher`""
+            $shortcut.WorkingDirectory = $cacheDir
+            $shortcut.WindowStyle = 7
+            $shortcut.Save()
+        }
+    } catch {}
+
+    Write-Log "Auto-healing daemon enabled (Triple-Layer Silent Autostart: Task + Registry + Startup Folder)." "SUCCESS"
 
     # Immediately spawn active background watcher process if not currently running
     try {
@@ -595,11 +607,15 @@ Function Register-WatcherTask {
 }
 
 Function Unregister-WatcherTask {
-    Write-Log "Unregistering Windows Scheduled Task '$taskName'..." "INFO"
+    Write-Log "Unregistering auto-healing daemon hooks..." "INFO"
     try {
         Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
         Remove-ItemProperty -Path $regRunKey -Name $regRunName -ErrorAction SilentlyContinue
-        Write-Log "Scheduled Task and HKCU Run hook successfully removed." "SUCCESS"
+        $startupDir = [Environment]::GetFolderPath('Startup')
+        if (Test-Path $startupDir) {
+            Remove-Item (Join-Path $startupDir "AntigravityChinesePatchWatcher.lnk") -Force -ErrorAction SilentlyContinue
+        }
+        Write-Log "Scheduled Task, HKCU Run hook, and Startup link successfully removed." "SUCCESS"
         return $true
     } catch {
         Write-Log "Error during unregistration: $_" "WARN"
@@ -610,28 +626,35 @@ Function Unregister-WatcherTask {
 Function Get-DaemonStatus {
     $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
     $runVal = (Get-ItemProperty -Path $regRunKey -ErrorAction SilentlyContinue).$regRunName
+    $startupDir = [Environment]::GetFolderPath('Startup')
+    $startupLnk = if (Test-Path $startupDir) { Test-Path (Join-Path $startupDir "AntigravityChinesePatchWatcher.lnk") } else { $false }
     
     $isTaskRegistered = ($null -ne $task)
     $isRunRegistered = ($null -ne $runVal)
+    $isStartupRegistered = $startupLnk
     
     $statusObj = @{
-        TaskRegistered = $isTaskRegistered
-        TaskState      = if ($task) { $task.State.ToString() } else { "None" }
-        RunHookEnabled = $isRunRegistered
-        DaemonActive   = ($isTaskRegistered -or $isRunRegistered)
+        TaskRegistered    = $isTaskRegistered
+        TaskState         = if ($task) { $task.State.ToString() } else { "None" }
+        RunHookEnabled    = $isRunRegistered
+        StartupLnkEnabled = $isStartupRegistered
+        DaemonActive      = ($isTaskRegistered -or $isRunRegistered -or $isStartupRegistered)
     }
 
     $taskColor = if ($isTaskRegistered) { "Green" } else { "Gray" }
     $runColor = if ($isRunRegistered) { "Green" } else { "Gray" }
+    $startupColor = if ($isStartupRegistered) { "Green" } else { "Gray" }
     $activeColor = if ($statusObj.DaemonActive) { "Green" } else { "Yellow" }
     $taskText = if ($isTaskRegistered) { "Registered (" + $task.State + ")" } else { "Not Registered" }
     $runText = if ($isRunRegistered) { "Enabled" } else { "Disabled" }
+    $startupText = if ($isStartupRegistered) { "Configured (Shell:Startup)" } else { "Disabled" }
     $activeText = if ($statusObj.DaemonActive) { "ENABLED" } else { "DISABLED" }
 
     if (-not $Quiet) {
         Write-Host "Auto-Healing Daemon Status:" -ForegroundColor Cyan
         Write-Host "  - Scheduled Task ($taskName): $taskText" -ForegroundColor $taskColor
         Write-Host "  - HKCU Run Hook: $runText" -ForegroundColor $runColor
+        Write-Host "  - Startup Folder Hook: $startupText" -ForegroundColor $startupColor
         Write-Host "  - Overall Status: $activeText" -ForegroundColor $activeColor
     }
     return $statusObj

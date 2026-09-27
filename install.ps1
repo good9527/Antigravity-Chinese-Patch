@@ -512,19 +512,34 @@ Function Set-DaemonState($action) {
 
         $silentCmd = "wscript.exe `"$silentVbs`" `"$cachedWatcher`""
 
+        # Layer 1: Scheduled Task (Elevated if supported)
         try {
             $taskAction = New-ScheduledTaskAction -Execute "wscript.exe" -Argument "`"$silentVbs`" `"$cachedWatcher`""
             $taskTrigger = New-ScheduledTaskTrigger -AtLogOn
             $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit 0 -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
             $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
             Register-ScheduledTask -TaskName $taskName -Action $taskAction -Trigger $taskTrigger -Settings $taskSettings -Principal $principal -Force | Out-Null
-            
-            Set-ItemProperty -Path $regRunKey -Name $regRunName -Value $silentCmd -ErrorAction SilentlyContinue
-            Write-Msg "Auto-healing daemon enabled (100% Invisible Background Silent Mode)." "Green"
-        } catch {
-            Set-ItemProperty -Path $regRunKey -Name $regRunName -Value $silentCmd -ErrorAction SilentlyContinue
-            Write-Msg "Auto-healing daemon enabled via HKCU Run key (Silent Mode)." "Yellow"
-        }
+        } catch {}
+
+        # Layer 2: HKCU Run registry autostart
+        Set-ItemProperty -Path $regRunKey -Name $regRunName -Value $silentCmd -ErrorAction SilentlyContinue
+
+        # Layer 3: Shell:Startup User Startup Folder (100% reliable for standard non-admin accounts)
+        try {
+            $startupDir = [Environment]::GetFolderPath('Startup')
+            if (Test-Path $startupDir) {
+                $wsh = New-Object -ComObject WScript.Shell
+                $lnkPath = Join-Path $startupDir "AntigravityChinesePatchWatcher.lnk"
+                $shortcut = $wsh.CreateShortcut($lnkPath)
+                $shortcut.TargetPath = "wscript.exe"
+                $shortcut.Arguments = "`"$silentVbs`" `"$cachedWatcher`""
+                $shortcut.WorkingDirectory = $cacheDir
+                $shortcut.WindowStyle = 7
+                $shortcut.Save()
+            }
+        } catch {}
+
+        Write-Msg "Auto-healing daemon enabled (Triple-Layer Silent Autostart: Task + Registry + Startup Folder)." "Green"
 
         # Immediately spawn active background watcher process if not currently running
         try {
@@ -554,12 +569,20 @@ Function Set-DaemonState($action) {
     } elseif ($action -eq "disable") {
         Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue | Out-Null
         Remove-ItemProperty -Path $regRunKey -Name $regRunName -ErrorAction SilentlyContinue
+        try {
+            $startupDir = [Environment]::GetFolderPath('Startup')
+            if (Test-Path $startupDir) {
+                Remove-Item (Join-Path $startupDir "AntigravityChinesePatchWatcher.lnk") -Force -ErrorAction SilentlyContinue
+            }
+        } catch {}
         Write-Msg "Auto-healing daemon disabled." "Yellow"
         return $true
     } elseif ($action -eq "status") {
         $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
         $runVal = (Get-ItemProperty -Path $regRunKey -ErrorAction SilentlyContinue).$regRunName
-        $active = ($null -ne $task) -or ($null -ne $runVal)
+        $startupDir = [Environment]::GetFolderPath('Startup')
+        $startupLnk = if (Test-Path $startupDir) { Test-Path (Join-Path $startupDir "AntigravityChinesePatchWatcher.lnk") } else { $false }
+        $active = ($null -ne $task) -or ($null -ne $runVal) -or $startupLnk
         $statusColor = if ($active) { "Green" } else { "Yellow" }
         $statusText = if ($active) { "ENABLED" } else { "DISABLED" }
         if (-not $Quiet) {
