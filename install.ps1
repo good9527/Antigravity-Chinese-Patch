@@ -507,7 +507,12 @@ Function Set-DaemonState($action) {
     if ($action -eq "enable") {
         # Deploy zero-window silent runner VBS (bypasses Windows 11 Windows Terminal popup)
         $silentVbs = Join-Path $cacheDir "silent_runner.vbs"
-        $vbsCode = "Set objShell = CreateObject(`"WScript.Shell`")`r`nIf WScript.Arguments.Count > 0 Then`r`n    objShell.Run `"powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"`"`" & WScript.Arguments(0) & `"`"`"`, 0, False`r`nEnd If`r`n"
+        $vbsCode = @'
+Set objShell = CreateObject("WScript.Shell")
+If WScript.Arguments.Count > 0 Then
+    objShell.Run "powershell.exe -WindowStyle Hidden -NoProfile -ExecutionPolicy Bypass -File """ & WScript.Arguments(0) & """", 0, False
+End If
+'@
         Set-Content -Path $silentVbs -Value $vbsCode -Encoding ASCII
 
         $silentCmd = "wscript.exe `"$silentVbs`" `"$cachedWatcher`""
